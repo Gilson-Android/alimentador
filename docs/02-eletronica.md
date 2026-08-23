@@ -158,7 +158,7 @@ negativo.
 - 28BYJ-48 / ULN2003: **470–1000 µF** entre 5 V e GND
 - NEMA 17 / DRV8825: **100 µF** entre VMOT e GND
 
-### Ligar o OV2640 na mão (placa sem conector de flat)
+## Ligar o OV2640 na mão (placa sem conector de flat)
 
 Se a sua placa é uma **ESP32-S3-DevKitC-1 / YD-ESP32-S3** (módulo N16R8, por
 exemplo), ela não tem o conector de 24 vias. Dá para usar um módulo OV2640

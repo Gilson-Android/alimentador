@@ -18,7 +18,11 @@ Ambientes disponíveis (o `-e`):
 |---|---|
 | `freenove_s3_cam` | Freenove ESP32-S3-WROOM CAM (padrão) |
 | `xiao_s3_sense` | Seeed XIAO ESP32S3 Sense |
+| `devkitc_s3_n16r8` | ESP32-S3-DevKitC-1 / YD-ESP32-S3, módulo N16R8 |
 | `s3_sem_camera` | qualquer ESP32-S3 sem câmera |
+
+Cada um desses tem uma variante `_nema17` (ex.: `freenove_s3_cam_nema17`) para
+quem usa NEMA 17 + driver STEP/DIR em vez do 28BYJ-48.
 
 **Placa Freenove:** grave pela porta **UART** (a que tem o chip USB-serial), não
 pela USB nativa. É onde o log serial aparece também. Se a gravação falhar,
