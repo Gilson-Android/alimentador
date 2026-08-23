@@ -674,8 +674,14 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
   <text class="tc" x="760" y="270" fill="#2f6fd0">azul</text>
   <text class="tc" x="760" y="300" fill="#30a46c">verde</text>
   <text class="tc" x="760" y="330" fill="#8b98a5">preto</text>
-  <text class="ts" x="795" y="212" fill="#8b98a5">bobina 1</text>
-  <text class="ts" x="795" y="360" fill="#8b98a5">bobina 2</text>
+  <!-- chaves marcando cada par de bobina -->
+  <path class="w" stroke="#6b7885" stroke-width="1.6" d="M848 262 H842 V286 H848"/>
+  <path class="w" stroke="#6b7885" stroke-width="1.6" d="M848 310 H842 V334 H848"/>
+  <text class="ts" x="838" y="268" text-anchor="end" fill="#8b98a5">bobina 1</text>
+  <text class="ts" x="838" y="330" text-anchor="end" fill="#8b98a5">bobina 2</text>
+  <text class="ts" x="920" y="384" text-anchor="middle" fill="#6b7885">conector chaveado:</text>
+  <text class="ts" x="920" y="398" text-anchor="middle" fill="#6b7885">só entra de um jeito</text>
+  <text class="ts" x="671" y="478" text-anchor="middle" fill="#6b7885">as cores são as que chegam AQUI, no plugue do driver</text>
 
   <path class="w v12" d="M790 128 H794"/>
   <line x1="794" y1="114" x2="794" y2="142" stroke="#e5484d" stroke-width="3.4"/>
@@ -742,8 +748,13 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  DRV8825; no A4988 é <code>corrente × 0,8</code>).
  <br>0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.</div>
 
- <div class="note"><b>O cabo do motor já vem reordenado — e isso resolve o problema
- dos pares para você.</b> Repare nas duas pontas:
+ <div class="note"><b>Por que a mesma cor aparece nas duas pontas do fio.</b> O cabo
+ reordena as <b>posições</b>, não as cores: o fio vermelho é vermelho de ponta a ponta, ele
+ só ocupa furos diferentes em cada conector. E o conector do lado do <b>motor é chaveado</b>
+ — só entra de um jeito, você não decide nada lá. A única decisão é no plugue do driver, que
+ é o que o desenho mostra.
+
+ <p style="margin:10px 0 0">Repare nas duas pontas:</p>
 
  <table style="margin-top:10px">
   <thead><tr><th>Ponta</th><th>Ordem dos fios</th><th>Pares de bobina</th></tr></thead>
