@@ -51,32 +51,32 @@ Compile com `pio run -e freenove_s3_cam -t upload`.
 
    GND da fonte ──► GND do ESP32 ──► GND do driver   (tudo no mesmo GND)
 
-   ESP32 GPIO 1  ──► STEP        M0 ──┐
+   ESP32 GPIO 1  ──► STP         M0 ──┐
    ESP32 GPIO 2  ──► DIR         M1 ──┴─► 3V3   (1/8 de micropasso)
    ESP32 GPIO 41 ──► EN          M2 ────► GND
    ESP32 3V3     ──► RST + SLP
-   A1 A2 ──► bobina 1 do motor
-   B1 B2 ──► bobina 2 do motor
+   1A + 2A ──► uma bobina do motor   (pinos vizinhos na placa)
+   1B + 2B ──► a outra bobina
 ```
 
-Os nomes abaixo são os da **serigrafia da placa** (clone azul/roxo da Pololu):
+Os nomes abaixo são os da **serigrafia da placa** (o clone roxo da Pololu):
 
 | Pino (serigrafia) | Ligar em | Observação |
 |---|---|---|
-|  | GPIO 1 | é o STEP |
-| api.html  cad  docs  firmware  index.html  README.md  stl | GPIO 2 | |
-|  | GPIO 41 | ativo em nível baixo; o firmware solta o motor quando para |
-| ,  | 3V3 do ESP32 | M2=0 M1=1 M0=1 → **1/8 de micropasso** |
-|  | GND | idem |
-| ,  | 3V3 do ESP32 | os dois; sem isso o driver fica em reset |
-|  +  vizinho | +12 V da fonte | **100 µF eletrolítico direto nesses dois pinos** |
-|  (o outro) | GND comum | mesmo GND do ESP32 e da fonte |
-|  +  | uma bobina do motor | os dois pinos de cada bobina são **vizinhos** na placa |
-|  +  | a outra bobina | |
-|  | — | é o FAULT; deixe solto |
+| **STP** | GPIO 1 | é o STEP |
+| **DIR** | GPIO 2 | |
+| **EN** | GPIO 41 | ativo em nível baixo; o firmware solta o motor quando para |
+| **M0**, **M1** | 3V3 do ESP32 | M2=0 M1=1 M0=1 → **1/8 de micropasso** |
+| **M2** | GND | idem |
+| **RST**, **SLP** | 3V3 do ESP32 | os dois; sem isso o driver fica em reset |
+| **VMOT** + o **GND** vizinho | +12 V da fonte | **100 µF eletrolítico direto nesses dois pinos** |
+| **GND** (o outro) | GND comum | mesmo GND do ESP32 e da fonte |
+| **1A** + **2A** | uma bobina do motor | os dois pinos de cada bobina são **vizinhos** na placa |
+| **1B** + **2B** | a outra bobina | |
+| **FLT** | — | é o FAULT; deixe solto |
 
-A ordem física dos 4 pinos de motor na placa é : os dois de cima são
-uma bobina, os dois de baixo são a outra.
+A ordem física dos 4 pinos de motor na placa, de cima para baixo, é
+**2A · 1A · 1B · 2B**: os dois de cima são uma bobina, os dois de baixo são a outra.
 
 **O DRV8825 não tem pino VDD.** Diferente do A4988, ele gera a lógica dele
 internamente a partir do VMOT — não existe fio de 3,3 V *alimentando* o driver. O
@@ -100,9 +100,9 @@ apitar — ou marcar 2 a 4 Ω — é uma bobina, e vai em **1A + 2A**. O outro p
 **1B + 2B**.
 
 Em motor de impressora com fios **vermelho / preto / azul / verde**, o mais comum é
- numa bobina e  na outra. Mas clone é clone: meça.
+**preto + verde** numa bobina e **vermelho + azul** na outra. Mas clone é clone: meça.
 
-Se o motor vibrar no lugar sem girar, você misturou os pares — troque  com .
+Se o motor vibrar no lugar sem girar, você misturou os pares — troque **2A** com **1B**.
 
 ### Outros drivers
 
