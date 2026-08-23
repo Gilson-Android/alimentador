@@ -48,6 +48,10 @@ Quatro abas:
 - **Agenda** — 8 horários. Cada linha: liga/desliga, hora, porções e os dias da
   semana (D S T Q Q S S). Não esqueça de *Salvar agenda*.
 - **Ajustes** — dosagem, travas de segurança, câmera, Telegram, rede.
+  Em *Câmera* existe o campo **URL de câmera externa**: se você não tem um módulo
+  OV2640, cole ali o endereço de qualquer fonte MJPEG/JPEG (celular velho com o app
+  *IP Webcam*, câmera Wi-Fi) e a aba *Agora* passa a mostrar essa imagem. O
+  navegador busca a URL direto; o ESP32 não faz proxy e não gasta memória com isso.
 - **Histórico** — as últimas 24 alimentações, com origem (agenda, manual,
   telegram, botão) e quantos grãos o sensor contou.
 

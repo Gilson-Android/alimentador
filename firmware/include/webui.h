@@ -151,6 +151,12 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
    <div><label>Girar vertical</label><select id="c_cv"><option value="0">Não</option><option value="1">Sim</option></select></div>
    <div><label>Espelhar</label><select id="c_ch"><option value="0">Não</option><option value="1">Sim</option></select></div>
   </div>
+  <div style="margin-top:10px"><label>Câmera externa (URL de imagem/MJPEG)</label>
+   <input id="c_cext" placeholder="vazio = usar a câmera do ESP32"></div>
+  <div class="hint">Não tem câmera no ESP32? Use um celular velho com o app
+  <b>IP Webcam</b>, ou qualquer câmera Wi-Fi que sirva MJPEG/JPEG, e cole a URL aqui
+  (ex.: <code>http://192.168.0.50:8080/video</code>). O navegador busca a imagem
+  direto — o alimentador não faz proxy.</div>
  </div>
  <div class="card">
   <label>Telegram (controle fora de casa)</label>
@@ -231,12 +237,17 @@ async function reboot(){
  try{await api('/api/reboot',{method:'POST'})}catch(e){}
  toast('Reiniciando...');
 }
-function snap(){$('#cam').src='/snapshot.jpg?t='+Date.now();streaming=false;
- $('#btnLive').textContent='Ligar vídeo'}
+function extUrl(){return (cfgCache&&cfgCache.camExtUrl)?cfgCache.camExtUrl:''}
+function snap(){
+ const u=extUrl();
+ $('#cam').src=(u?u+(u.indexOf('?')<0?'?':'&'):'/snapshot.jpg?')+'t='+Date.now();
+ streaming=false;$('#btnLive').textContent='Ligar vídeo';
+}
 function live(){
- const img=$('#cam');
+ const img=$('#cam'), u=extUrl();
  if(streaming){img.src='';streaming=false;$('#btnLive').textContent='Ligar vídeo';return}
- img.src=location.protocol+'//'+location.hostname+':81/stream?t='+Date.now();
+ img.src=u ? u+(u.indexOf('?')<0?'?':'&')+'t='+Date.now()
+           : location.protocol+'//'+location.hostname+':81/stream?t='+Date.now();
  streaming=true;$('#btnLive').textContent='Parar vídeo';
 }
 
@@ -248,7 +259,8 @@ async function status(){
   $('#last').textContent=s.lastFeed||'nunca';
   $('#clock').textContent=s.time||'--:--';
   $('#hdr').textContent=(s.ip||'')+' · '+s.rssi+'dBm';
-  $('#camHint').textContent=s.cam?('câmera ok'):('câmera indisponível: '+(s.camErr||''));
+  $('#camHint').textContent = extUrl() ? ('câmera externa: '+extUrl())
+     : (s.cam ? 'câmera ok' : ('câmera indisponível: '+(s.camErr||'')));
  }catch(e){$('#dot').classList.remove('on')}
 }
 
@@ -288,6 +300,7 @@ function fillCfg(c){
  $('#c_int').value=c.minIntervalS;      $('#c_cat').value=c.catchUpMin;
  $('#c_csz').value=c.camSize;           $('#c_cq').value=c.camQuality;
  $('#c_cv').value=c.camVflip?1:0;       $('#c_ch').value=c.camHmirror?1:0;
+ $('#c_cext').value=c.camExtUrl||'';
  $('#c_tgc').value=c.tgChat||'';        $('#c_tgn').value=c.tgNotify?1:0;
  $('#c_ssid').value=c.ssid||'';         $('#c_host').value=c.host||'';
  $('#c_tz').value=c.tz||'';
@@ -300,6 +313,7 @@ async function saveCfg(){
   minIntervalS:+$('#c_int').value,catchUpMin:+$('#c_cat').value,
   camSize:+$('#c_csz').value,camQuality:+$('#c_cq').value,
   camVflip:$('#c_cv').value=='1',camHmirror:$('#c_ch').value=='1',
+  camExtUrl:$('#c_cext').value,
   tgChat:$('#c_tgc').value,tgNotify:$('#c_tgn').value=='1',
   ssid:$('#c_ssid').value,host:$('#c_host').value,tz:$('#c_tz').value};
  if($('#c_tgt').value) b.tgToken=$('#c_tgt').value;

@@ -20,6 +20,10 @@ struct Settings {
     char     host[24];
     char     uiPass[33];        // vazio = interface sem senha (so na LAN!)
     char     tz[40];
+    // Camera externa (celular velho com IP Webcam, camera Wi-Fi, DVR...).
+    // Se preenchido, a interface mostra ESSA imagem em vez da camera do ESP32.
+    // O navegador busca a URL direto -- o ESP32 nao faz proxy, nao gasta RAM.
+    char     camExtUrl[96];
     char     tgToken[64];       // token do bot do Telegram (opcional)
     char     tgChat[24];        // chat id autorizado
     bool     tgNotify;          // avisar a cada alimentacao

@@ -80,6 +80,7 @@ void settingsToJson(JsonObject o, bool secrets) {
     o["camHmirror"]      = cfg.camHmirror;
     o["camSize"]         = cfg.camSize;
     o["camQuality"]      = cfg.camQuality;
+    o["camExtUrl"]       = cfg.camExtUrl;
     if (secrets) {
         o["pass"]    = cfg.pass;
         o["uiPass"]  = cfg.uiPass;
@@ -102,6 +103,7 @@ bool settingsFromJson(JsonObjectConst o) {
     copyIf(o, "host",    cfg.host,    sizeof(cfg.host));
     copyIf(o, "uiPass",  cfg.uiPass,  sizeof(cfg.uiPass));
     copyIf(o, "tz",      cfg.tz,      sizeof(cfg.tz));
+    copyIf(o, "camExtUrl", cfg.camExtUrl, sizeof(cfg.camExtUrl));
     copyIf(o, "tgToken", cfg.tgToken, sizeof(cfg.tgToken));
     copyIf(o, "tgChat",  cfg.tgChat,  sizeof(cfg.tgChat));
 
