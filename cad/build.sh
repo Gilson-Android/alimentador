@@ -10,13 +10,17 @@
 set -u
 OS="${OPENSCAD:-/c/Program Files/OpenSCAD/openscad.com}"
 ROOT=../stl
+FAIL=0
 
 # render <pasta_saida> <arquivo.scad> <saida.stl> [args extras]
 render() {
   local dir="$1"; local src="$2"; local dst="$3"; shift 3
   mkdir -p "$dir"
   printf '  %-14s -> %s\n' "$src" "${dir#../stl/}/$dst"
-  "$OS" -o "$dir/$dst" "$@" "$src" 2>&1 | grep -Ei 'error|warning' && return 1
+  # qualquer error/warning do OpenSCAD reprova o build (usado na CI)
+  if "$OS" -o "$dir/$dst" "$@" "$src" 2>&1 | grep -Ei 'error|warning'; then
+    FAIL=1
+  fi
   return 0
 }
 
@@ -52,4 +56,8 @@ if [ "${1:-}" = "--montagem" ]; then
   render $ROOT assembly.scad montagem_explodida.stl --export-format binstl -D 'EXPLODE=1' -D 'SHOW_TANK=false'
 fi
 
+if [ "$FAIL" -ne 0 ]; then
+  echo "FALHOU: o OpenSCAD reclamou de alguma peca (veja acima)." >&2
+  exit 1
+fi
 echo "Pronto. STLs em $(cd $ROOT && pwd)"

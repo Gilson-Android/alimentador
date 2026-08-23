@@ -1,0 +1,120 @@
+# =====================================================================
+#  AquaFeeder — CI no Azure DevOps
+#
+#  O que ele faz a cada push na main:
+#    1) compila o firmware nos 5 ambientes (as 3 placas x 2 motores)
+#       e publica os .bin como artefato
+#    2) renderiza TODAS as peças no OpenSCAD e publica os .stl
+#       -> qualquer warning do OpenSCAD REPROVA o build
+#
+#  Por que o passo 2 importa: erro de CAD não aparece na hora de editar,
+#  aparece 3 dias depois quando você vai fatiar. Referência circular,
+#  variável usada antes de existir e overhang novo passam batido sem isso.
+#
+#  Como ligar (uma vez):
+#    Azure DevOps > Pipelines > New pipeline > GitHub > Gilson-Android/alimentador
+#    > Existing Azure Pipelines YAML file > /azure-pipelines.yml
+# =====================================================================
+trigger:
+  branches:
+    include: [main]
+  paths:
+    exclude:
+      - docs/**
+      - '*.md'
+      - index.html
+      - api.html
+      - stl/**          # STL é saída, não entrada
+
+pr:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+# ---------------------------------------------------------------- firmware
+- job: firmware
+  displayName: Firmware ESP32-S3
+  timeoutInMinutes: 40
+  steps:
+  - task: UsePythonVersion@0
+    displayName: Python 3.11
+    inputs:
+      versionSpec: '3.11'
+
+  # o toolchain do ESP32 tem ~1 GB: sem cache cada build gasta 6 min só baixando
+  - task: Cache@2
+    displayName: Cache do PlatformIO
+    inputs:
+      key: 'pio | "$(Agent.OS)" | firmware/platformio.ini'
+      path: $(HOME)/.platformio
+
+  - script: python -m pip install --upgrade pip platformio
+    displayName: Instala PlatformIO
+
+  - script: |
+      set -e
+      cd firmware
+      pio run \
+        -e freenove_s3_cam \
+        -e freenove_s3_cam_nema17 \
+        -e xiao_s3_sense \
+        -e xiao_s3_sense_nema17 \
+        -e s3_sem_camera
+    displayName: Compila os 5 ambientes
+
+  # trata warning do nosso código como problema (o framework gera muitos, ignora)
+  - script: |
+      set -e
+      cd firmware
+      pio run -e freenove_s3_cam 2>&1 | tee /tmp/build.log || true
+      if grep -E '^(src|include)/.*warning:' /tmp/build.log; then
+        echo "##vso[task.logissue type=warning]O nosso código gerou warning de compilação"
+      fi
+    displayName: Procura warning no nosso código
+
+  - script: |
+      set -e
+      mkdir -p $(Build.ArtifactStagingDirectory)/firmware
+      for e in freenove_s3_cam freenove_s3_cam_nema17 xiao_s3_sense xiao_s3_sense_nema17 s3_sem_camera; do
+        d=firmware/.pio/build/$e
+        [ -f "$d/firmware.bin" ] || continue
+        mkdir -p $(Build.ArtifactStagingDirectory)/firmware/$e
+        cp $d/firmware.bin $d/bootloader.bin $d/partitions.bin \
+           $(Build.ArtifactStagingDirectory)/firmware/$e/
+      done
+      ls -R $(Build.ArtifactStagingDirectory)/firmware
+    displayName: Junta os binários
+
+  - publish: $(Build.ArtifactStagingDirectory)/firmware
+    artifact: firmware-bin
+    displayName: Publica os .bin
+
+# --------------------------------------------------------------------- CAD
+- job: cad
+  displayName: Peças 3D (OpenSCAD)
+  timeoutInMinutes: 40
+  steps:
+  - script: |
+      set -e
+      sudo apt-get update -qq
+      sudo apt-get install -y --no-install-recommends openscad
+      openscad --version
+    displayName: Instala OpenSCAD
+
+  # build.sh sai com código 1 se o OpenSCAD emitir qualquer error/warning
+  - script: |
+      set -e
+      cd cad
+      chmod +x build.sh
+      OPENSCAD=openscad ./build.sh
+    displayName: Renderiza todas as peças
+
+  - script: python3 cad/dims.py
+    displayName: Relatorio das pecas (dimensoes e massa)
+
+  - publish: stl
+    artifact: stl
+    displayName: Publica os .stl

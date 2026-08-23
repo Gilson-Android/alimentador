@@ -69,7 +69,7 @@ As quatro peças que dependem do motor ficam em `stl/motor_28byj/` e
 | `tampa_da_caixa.stl` | 1 | 14 g | |
 | `suporte_da_camera.stl` | 1 | 15 g | já com o giro de 45° que desvia do funil |
 
-Total ≈ **255 g** (28BYJ) ou **270 g** (NEMA 17). Cabe tudo em duas mesas na K1 Max (300×300).
+Total ≈ **256 g** (28BYJ) ou **263 g** (NEMA 17). Cabe tudo em duas mesas na K1 Max (300×300).
 Sugestão: mesa 1 = `bracket` + `hopper` + `lid`; mesa 2 = o resto.
 
 ## Detalhes que importam

@@ -116,6 +116,14 @@ Alimentador/
 
 O firmware compila limpo em todos os ambientes (testado): RAM 17%, Flash 32%.
 
+**CI:** `azure-pipelines.yml` compila o firmware nos 5 ambientes e renderiza todas
+as peças no OpenSCAD a cada push — qualquer warning do OpenSCAD reprova o build.
+Os `.bin` e os `.stl` saem como artefato. Para ligar: Azure DevOps → Pipelines →
+New pipeline → GitHub → *Existing YAML* → `/azure-pipelines.yml`.
+
+**Relatório das peças:** `python cad/dims.py` lista dimensões, volume e massa
+estimada em PETG de cada peça, com o total por kit.
+
 Para mudar qualquer medida, edite `cad/common.scad` e rode `cad/build.sh` —
 todos os STLs são regerados. Precisa do [OpenSCAD](https://openscad.org) instalado.
 
