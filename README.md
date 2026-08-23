@@ -85,6 +85,13 @@ Alternativas de placa que o firmware já suporta: **XIAO ESP32S3 Sense**
 
 ## Ordem de execução
 
+**Comece pelo [roteiro das 9 etapas](docs/00-etapas.md).** Ele é a ordem de
+execução com um teste objetivo no fim de cada etapa — não passe para a próxima
+sem o visto. A câmera é a última de propósito: é a única parte que, se não
+funcionar, não impede o alimentador de alimentar.
+
+Os arquivos abaixo são a referência por assunto, para consultar dentro de cada etapa:
+
 1. **[Imprimir](docs/01-impressao.md)** — comece pela peça de teste (`peca_de_teste.stl`, ~10 min).
    Só depois imprima o resto.
 2. **[Eletrônica](docs/02-eletronica.md)** — 6 fios, nada de solda obrigatória.
