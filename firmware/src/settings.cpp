@@ -25,6 +25,9 @@ void settingsDefaults() {
     cfg.camHmirror      = false;
     cfg.camSize         = 2;      // SVGA 800x600
     cfg.camQuality      = 12;
+    cfg.mqttPort        = 8883;
+    cfg.mqttTls         = true;
+    strlcpy(cfg.mqttPrefix, "aquafeeder", sizeof(cfg.mqttPrefix));
     // agenda inicial: 08:00 e 18:00, 2 porcoes, todos os dias
     cfg.slots[0] = {true, 8,  0, 0x7F, 2};
     cfg.slots[1] = {true, 18, 0, 0x7F, 2};
@@ -81,10 +84,17 @@ void settingsToJson(JsonObject o, bool secrets) {
     o["camSize"]         = cfg.camSize;
     o["camQuality"]      = cfg.camQuality;
     o["camExtUrl"]       = cfg.camExtUrl;
+    o["mqttHost"]        = cfg.mqttHost;
+    o["mqttPort"]        = cfg.mqttPort;
+    o["mqttUser"]        = cfg.mqttUser;
+    o["mqttPrefix"]      = cfg.mqttPrefix;
+    o["mqttTls"]         = cfg.mqttTls;
+    o["mqttEnabled"]     = strlen(cfg.mqttHost) > 3;
     if (secrets) {
         o["pass"]    = cfg.pass;
         o["uiPass"]  = cfg.uiPass;
-        o["tgToken"] = cfg.tgToken;
+        o["tgToken"]   = cfg.tgToken;
+        o["mqttPass"] = cfg.mqttPass;
     }
     JsonArray arr = o["slots"].to<JsonArray>();
     for (int i = 0; i < MAX_SLOTS; i++) {
@@ -103,7 +113,11 @@ bool settingsFromJson(JsonObjectConst o) {
     copyIf(o, "host",    cfg.host,    sizeof(cfg.host));
     copyIf(o, "uiPass",  cfg.uiPass,  sizeof(cfg.uiPass));
     copyIf(o, "tz",      cfg.tz,      sizeof(cfg.tz));
-    copyIf(o, "camExtUrl", cfg.camExtUrl, sizeof(cfg.camExtUrl));
+    copyIf(o, "camExtUrl",  cfg.camExtUrl,  sizeof(cfg.camExtUrl));
+    copyIf(o, "mqttHost",   cfg.mqttHost,   sizeof(cfg.mqttHost));
+    copyIf(o, "mqttUser",   cfg.mqttUser,   sizeof(cfg.mqttUser));
+    copyIf(o, "mqttPass",   cfg.mqttPass,   sizeof(cfg.mqttPass));
+    copyIf(o, "mqttPrefix", cfg.mqttPrefix, sizeof(cfg.mqttPrefix));
     copyIf(o, "tgToken", cfg.tgToken, sizeof(cfg.tgToken));
     copyIf(o, "tgChat",  cfg.tgChat,  sizeof(cfg.tgChat));
 
@@ -112,6 +126,8 @@ bool settingsFromJson(JsonObjectConst o) {
     if (o["sensorEnabled"].is<bool>()) cfg.sensorEnabled = o["sensorEnabled"];
     if (o["camVflip"].is<bool>())      cfg.camVflip      = o["camVflip"];
     if (o["camHmirror"].is<bool>())    cfg.camHmirror    = o["camHmirror"];
+    if (o["mqttTls"].is<bool>())       cfg.mqttTls       = o["mqttTls"];
+    if (o["mqttPort"].is<uint16_t>())  cfg.mqttPort      = o["mqttPort"];
     if (o["camSize"].is<uint8_t>())    cfg.camSize       = constrain((int)o["camSize"], 0, 3);
     if (o["camQuality"].is<uint8_t>()) cfg.camQuality    = constrain((int)o["camQuality"], 10, 30);
 

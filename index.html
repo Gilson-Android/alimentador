@@ -248,7 +248,7 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
    <tr><td><b>Agenda</b></td><td>Até 8 horários, com dias da semana e porções por horário</td></tr>
    <tr><td><b>Alimentar agora</b></td><td>Interface web, comando no Telegram ou o botão BOOT da placa</td></tr>
    <tr><td><b>Câmera</b></td><td>Foto sob demanda e vídeo MJPEG ao vivo. Não tem câmera compatível? Dá para apontar a interface para uma <b>câmera externa</b> (celular velho com IP Webcam, câmera Wi-Fi)</td></tr>
-   <tr><td><b>Fora de casa</b></td><td>Bot do Telegram — sem abrir porta no roteador</td></tr>
+   <tr><td><b>Fora de casa</b></td><td>Bot do Telegram <b>ou MQTT</b> — sem abrir porta no roteador; quem conecta é sempre o aparelho, para fora</td></tr>
    <tr><td><b>Queda de luz</b></td><td>Recupera a refeição perdida quando a energia volta</td></tr>
    <tr><td><b>Anti-entupimento</b></td><td>Recua a rosca antes de cada dose; sensor de grãos opcional avisa se nada caiu</td></tr>
    <tr><td><b>Travas</b></td><td>Limite de porções por dia, por acionamento e intervalo mínimo</td></tr>
@@ -625,10 +625,10 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
   <circle cx="596" cy="406" r="4" class="fdir"/><text class="tp" x="608" y="410">DIR</text>
   <circle cx="746" cy="176" r="4" class="fv12"/><text class="tp" x="734" y="180" text-anchor="end">VMOT</text>
   <circle cx="746" cy="206" r="4" class="fgnd"/><text class="tp" x="734" y="210" text-anchor="end">GND</text>
-  <circle cx="746" cy="246" r="4" class="fmblu"/><text class="tp" x="734" y="250" text-anchor="end">2B</text>
-  <circle cx="746" cy="276" r="4" class="fv12"/><text class="tp" x="734" y="280" text-anchor="end">1B</text>
-  <circle cx="746" cy="306" r="4" class="fgnd"/><text class="tp" x="734" y="310" text-anchor="end">1A</text>
-  <circle cx="746" cy="336" r="4" class="fmgrn"/><text class="tp" x="734" y="340" text-anchor="end">2A</text>
+  <circle cx="746" cy="246" r="4" class="fv12"/><text class="tp" x="734" y="250" text-anchor="end">2B</text>
+  <circle cx="746" cy="276" r="4" class="fmblu"/><text class="tp" x="734" y="280" text-anchor="end">1B</text>
+  <circle cx="746" cy="306" r="4" class="fmgrn"/><text class="tp" x="734" y="310" text-anchor="end">1A</text>
+  <circle cx="746" cy="336" r="4" class="fgnd"/><text class="tp" x="734" y="340" text-anchor="end">2A</text>
   <text class="tp" x="734" y="380" text-anchor="end" fill="#6b7885">FLT</text>
   <circle cx="746" cy="406" r="4" class="fgnd"/><text class="tp" x="734" y="410" text-anchor="end">GND</text>
   <circle cx="671" cy="424" r="13" fill="#0e1319" stroke="#8c3a45" stroke-width="1.6"/>
@@ -666,14 +666,14 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
   <path class="w gnd" d="M434 330 H556 V266 H596"/>
 
   <!-- bobinas: cores REAIS do cabo do motor -->
-  <path class="w mblu" d="M746 246 H830 V262 H866"/>
-  <path class="w mred" d="M746 276 H814 V286 H866"/>
-  <path class="w mblk" d="M746 306 H814 V310 H866"/>
-  <path class="w mgrn" d="M746 336 H830 V334 H866"/>
-  <text class="tc" x="760" y="240" fill="#2f6fd0">azul</text>
-  <text class="tc" x="760" y="270" fill="#e5484d">vermelho</text>
-  <text class="tc" x="760" y="300" fill="#8b98a5">preto</text>
-  <text class="tc" x="760" y="330" fill="#30a46c">verde</text>
+  <path class="w mred" d="M746 246 H830 V262 H866"/>
+  <path class="w mblu" d="M746 276 H814 V286 H866"/>
+  <path class="w mgrn" d="M746 306 H814 V310 H866"/>
+  <path class="w mblk" d="M746 336 H830 V334 H866"/>
+  <text class="tc" x="760" y="240" fill="#e5484d">vermelho</text>
+  <text class="tc" x="760" y="270" fill="#2f6fd0">azul</text>
+  <text class="tc" x="760" y="300" fill="#30a46c">verde</text>
+  <text class="tc" x="760" y="330" fill="#8b98a5">preto</text>
   <text class="ts" x="795" y="212" fill="#8b98a5">bobina 1</text>
   <text class="ts" x="795" y="360" fill="#8b98a5">bobina 2</text>
 
@@ -742,12 +742,31 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  DRV8825; no A4988 é <code>corrente × 0,8</code>).
  <br>0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.</div>
 
- <div class="warn"><b>Confirme os pares com o multímetro antes de ligar.</b> O desenho
- usa a combinação mais comum em motor de impressora: <b>vermelho+azul</b> numa bobina e
- <b>preto+verde</b> na outra. Mas clone é clone. Ponha o multímetro em continuidade (ou
- ohms) e toque dois fios por vez: o par que apitar — ou marcar 2 a 4 Ω — é uma bobina.
- Se o motor vibrar no lugar sem girar, você trocou os pares: inverta <code>2A</code> com
- <code>1B</code>.</div>
+ <div class="note"><b>O cabo do motor já vem reordenado — e isso resolve o problema
+ dos pares para você.</b> Repare nas duas pontas:
+
+ <table style="margin-top:10px">
+  <thead><tr><th>Ponta</th><th>Ordem dos fios</th><th>Pares de bobina</th></tr></thead>
+  <tbody>
+   <tr><td>no motor (JST branco)</td><td>vermelho · preto · azul · verde</td><td>intercalados</td></tr>
+   <tr><td>no driver (plugue de 4 vias)</td><td>vermelho · azul · verde · preto</td><td><b>vizinhos</b></td></tr>
+  </tbody>
+ </table>
+
+ <p style="margin:10px 0 0">O cabo troca a ordem de propósito: no plugue os pares ficam
+ lado a lado. E os 4 pinos de motor do DRV8825 também são vizinhos por par
+ (<code>2B 1B</code> = uma bobina, <code>1A 2A</code> = a outra). Então o plugue de 4 vias
+ <b>encaixa direto nos 4 pinos, em sequência</b>, sem separar fio nenhum.</p>
+
+ <p style="margin:10px 0 0">Melhor ainda: <b>as duas orientações funcionam</b>. Se você
+ plugar virado 180°, os pares continuam certos (só troca qual bobina é qual) — a única
+ diferença é o sentido de giro da rosca, que você corrige em
+ <i>Ajustes → Dosagem → Inverter sentido</i> sem mexer em fio.</p></div>
+
+ <div class="warn"><b>Se o seu cabo for outro:</b> ponha o multímetro em continuidade e
+ toque dois fios por vez. O par que apitar — ou marcar 2 a 4 Ω — é uma bobina, e os dois
+ fios dela têm que cair em <code>2B 1B</code> ou em <code>1A 2A</code>. Motor que vibra no
+ lugar sem girar é sempre par misturado.</div>
 
  <div class="note">Outros drivers: <b>A4988</b> → MS1 e MS2 em 3V3, MS3 em GND, e ele
  <i>precisa</i> de VDD em 3V3. <b>TMC2208/2209</b> → MS1 e MS2 em GND (já é 1/8 de
@@ -1105,12 +1124,21 @@ esptool.py --chip esp32s3 --port COM5 --baud 921600 write_flash -z \
  certificado (<code>setInsecure()</code>) para economizar memória — é o que praticamente
  toda biblioteca de bot para ESP32 faz. Risco real baixo, mas está dito.</div>
 
- <h3>2. VPN / Tailscale</h3>
+ <h3>2. MQTT (para integrar com outros sistemas)</h3>
+ <p>Se você quer comandar o alimentador de <b>fora do celular</b> — n8n, Home Assistant,
+ Power Automate, um script no servidor — o caminho é MQTT. O ESP32 conecta <b>para fora</b>
+ num broker e fica escutando um tópico; quem quiser mandar comando publica nesse tópico.
+ Configure em <i>Ajustes → MQTT</i>.</p>
+ <p>Ele traz um alarme que o Telegram não tem: o tópico <code>aquafeeder/online</code>
+ usa <b>Last Will</b>, então se o alimentador cair é o <b>próprio broker</b> que avisa.
+ Detalhes e exemplos na <a href="api.html#mqtt">referência da API</a>.</p>
+
+ <h3>3. VPN / Tailscale</h3>
  <p>Se quer o vídeo ao vivo e a interface inteira de fora, instale <b>Tailscale</b> ou
  WireGuard num computador que fique ligado em casa. Muitos roteadores modernos já trazem
  servidor VPN embutido.</p>
 
- <h3>3. Porta aberta no roteador — não faça</h3>
+ <h3>4. Porta aberta no roteador — não faça</h3>
  <p>Encaminhar a porta 80 para a internet expõe um dispositivo caseiro a varredura
  constante. Se ainda assim quiser: senha forte na interface, porta externa alta e
  aleatória, nunca exponha a porta 81 (vídeo) e prefira um proxy reverso com HTTPS.</p>

@@ -152,7 +152,7 @@ n17_flat     = 4.6;    // cota do achatado (do plano ate o lado oposto)
 // Folga do encaixe. Furo vertical em FDM sai 0.1-0.3mm menor que o nominal:
 // com 0.15 o eixo de aco nao entrava sem broca. Com 0.35 desliza e o parafuso
 // de fixacao tira a folga -- quem centra a rosca sao os mancais dela, nao o eixo.
-n17_socket_c = 0.35;
+n17_socket_c = 0.25;   // medido na K1 Max: 0.35 saiu frouxo, 0.25 acerta
 n17_plate    = 52;     // lado do prato
 n17_plate_t  = 4.5;
 n17_socket_d = 20;     // encaixe fundo: engole eixo de ate ~24mm sem cortar

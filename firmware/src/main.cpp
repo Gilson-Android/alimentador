@@ -17,10 +17,17 @@
 #include "camera.h"
 #include "webserver.h"
 #include "telegram.h"
+#include "mqtt.h"
 
 static bool     apMode      = false;
 static uint32_t lostSince   = 0;
 static time_t   slotTried[MAX_SLOTS] = {0};
+
+// Um evento de alimentacao vai para todos os canais de aviso
+static void avisaTodos(uint8_t portions, const char *src, bool ok, uint16_t pulses) {
+    tgNotifyFeed(portions, src, ok, pulses);
+    mqttNotifyFeed(portions, src, ok, pulses);
+}
 
 // --------------------------------------------------------------------- hora
 static bool timeOk() {
@@ -140,7 +147,7 @@ void setup() {
 
     settingsLoad();
     feederInit();
-    feederOnDone(tgNotifyFeed);
+    feederOnDone(avisaTodos);
 
 #if HAS_CAMERA
     if (!cameraInit())
@@ -150,6 +157,7 @@ void setup() {
     startWifi();
     webStart();
     tgBegin();
+    mqttBegin();
 
     ArduinoOTA.setHostname(cfg.host);
     if (strlen(cfg.uiPass)) ArduinoOTA.setPassword(cfg.uiPass);

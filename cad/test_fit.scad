@@ -39,10 +39,14 @@ module motor_gauge() {
 // --- 2) encaixe do eixo ---------------------------------------------
 module shaft_gauge() {
     if (motor_type == "NEMA17") {
+        // Mesma profundidade da rosca de verdade (n17_socket_d), senao o
+        // gabarito bate no fundo e parece que falta encaixe. Lembre: no
+        // conjunto real ainda tem o prato de 4,5mm entre motor e rosca,
+        // entao o eixo entra 5,1mm MENOS do que entra aqui.
         difference() {
-            cylinder(d = hub_d, h = 16);
+            cylinder(d = hub_d, h = n17_socket_d + 3);
             translate([0, 0, -eps])
-                cylinder(d = n17_shaft_d + 2*n17_socket_c + fit, h = 14);
+                cylinder(d = n17_shaft_d + 2*n17_socket_c + fit, h = n17_socket_d);
             translate([0, 0, 7])  rotate([0, 90, 0]) cylinder(d = m3_tap, h = hub_d);
             translate([0, 0, 12]) rotate([90, 0, 0]) cylinder(d = m3_tap, h = hub_d);
         }

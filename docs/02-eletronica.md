@@ -75,8 +75,17 @@ Os nomes abaixo são os da **serigrafia da placa** (o clone roxo da Pololu):
 | **1B** + **2B** | a outra bobina | |
 | **FLT** | — | é o FAULT; deixe solto |
 
-A ordem física dos 4 pinos de motor na placa, de cima para baixo, é
-**2A · 1A · 1B · 2B**: os dois de cima são uma bobina, os dois de baixo são a outra.
+Os 4 pinos de motor ficam no meio daquela fileira, entre o par `VMOT`/`GND` e o
+par `FLT`/`GND`. **Contando a partir do lado do `VMOT`**, a ordem é:
+
+```
+VMOT · GND · 2B · 1B · 1A · 2A · FLT · GND
+              └──┬──┘   └──┬──┘
+              bobina 1  bobina 2
+```
+
+Os dois pinos de cada bobina são vizinhos — é isso que faz o plugue do cabo
+encaixar direto.
 
 **O DRV8825 não tem pino VDD.** Diferente do A4988, ele gera a lógica dele
 internamente a partir do VMOT — não existe fio de 3,3 V *alimentando* o driver. O
@@ -93,7 +102,25 @@ trimpot e o GND:
 
 0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.
 
-### Achar os pares de bobina (não confie na cor)
+### O cabo que vem com o motor já resolve os pares
+
+Os cabos de motor de impressora **trocam a ordem dos fios entre as duas pontas**,
+de propósito:
+
+| Ponta | Ordem | Pares |
+|---|---|---|
+| no motor (JST) | vermelho · preto · azul · verde | intercalados |
+| no driver (plugue 4 vias) | vermelho · azul · verde · preto | **vizinhos** |
+
+Como os 4 pinos de motor do DRV8825 também são vizinhos por par (`2B`+`1B` e
+`1A`+`2A`), o plugue **encaixa direto nos 4 pinos em sequência**, sem separar fio
+nenhum.
+
+E tanto faz a orientação: plugado virado 180° os pares continuam certos (só troca
+qual bobina é qual). A única diferença é o sentido de giro da rosca, que se
+corrige em *Ajustes → Dosagem → Inverter sentido*, sem mexer em fio.
+
+### Se o seu cabo for outro: achar os pares
 
 Multímetro em continuidade (ou ohms) e toque dois fios do motor por vez. O par que
 apitar — ou marcar 2 a 4 Ω — é uma bobina, e vai em **1A + 2A**. O outro par vai em

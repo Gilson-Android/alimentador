@@ -24,6 +24,15 @@ struct Settings {
     // Se preenchido, a interface mostra ESSA imagem em vez da camera do ESP32.
     // O navegador busca a URL direto -- o ESP32 nao faz proxy, nao gasta RAM.
     char     camExtUrl[96];
+    // MQTT (opcional): comando pela nuvem sem abrir porta no roteador.
+    // Quem conecta e o ESP32, para fora. Broker vazio = MQTT desligado.
+    char     mqttHost[64];
+    uint16_t mqttPort;
+    char     mqttUser[40];
+    char     mqttPass[56];
+    char     mqttPrefix[24];    // padrao "aquafeeder"
+    bool     mqttTls;
+
     char     tgToken[64];       // token do bot do Telegram (opcional)
     char     tgChat[24];        // chat id autorizado
     bool     tgNotify;          // avisar a cada alimentacao

@@ -124,6 +124,8 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  <a href="#reboot">POST /api/reboot</a>
  <a href="#snapshot">GET /snapshot.jpg</a>
  <a href="#stream">GET :81/stream</a>
+ <div class="grp">Nuvem</div>
+ <a href="#mqtt">MQTT</a>
  <div class="grp">Referência</div>
  <a href="#erros">Erros</a>
  <a href="#slots">Formato da agenda</a>
@@ -417,6 +419,78 @@ curl -b ck.txt -X POST http://aquafeeder.local/api/config \
    conexão de vídeo consome quase toda a banda do Wi-Fi do ESP32 — use foto no dia a dia.</p>
   </div>
  </div>
+</section>
+
+<section id="mqtt">
+ <h2>MQTT — comando pela nuvem</h2>
+ <p>A API HTTP só existe dentro da sua rede. O MQTT resolve o acesso de fora sem abrir
+ porta nenhuma no roteador: <b>quem inicia a conexão é o ESP32</b>. Ele sai para o broker
+ ao ligar, deixa a conexão pendurada assinando <code>&lt;prefixo&gt;/cmd</code>, e o
+ comando chega em milissegundos.</p>
+
+ <div class="card">
+  <b>O que o MQTT dá e o Telegram não dá:</b> alarme automático de "parou de
+  funcionar". O tópico <code>&lt;prefixo&gt;/online</code> é publicado como
+  <b>Last Will</b> — se o alimentador travar, cair a luz ou cair a internet, é o
+  <b>próprio broker</b> que publica <code>0</code> ali. Com Telegram você só recebe
+  silêncio, que é indistinguível de "está tudo bem e ninguém mandou mensagem".
+ </div>
+
+ <h3>Configurar</h3>
+ <p>Em <i>Ajustes → MQTT</i>: broker, porta, usuário, senha e prefixo. Broker vazio
+ desliga o MQTT. Funciona com qualquer broker padrão — <b>HiveMQ Cloud</b> e
+ <b>EMQX Serverless</b> têm plano free com TLS, ou você sobe um Mosquitto em casa
+ (aí desmarque o TLS e use a porta 1883).</p>
+
+ <h3>Tópicos</h3>
+ <table>
+  <thead><tr><th>Tópico</th><th>Direção</th><th>Conteúdo</th></tr></thead>
+  <tbody>
+   <tr><td><code>aquafeeder/cmd</code></td><td>você → aparelho</td><td>o comando</td></tr>
+   <tr><td><code>aquafeeder/online</code></td><td>aparelho → você</td><td><code>1</code> / <code>0</code>, retido. O <code>0</code> vem do broker (Last Will)</td></tr>
+   <tr><td><code>aquafeeder/status</code></td><td>aparelho → você</td><td>JSON retido, a cada 60 s e a cada evento</td></tr>
+   <tr><td><code>aquafeeder/evento</code></td><td>aparelho → você</td><td>uma mensagem por alimentação</td></tr>
+  </tbody>
+ </table>
+
+ <h3>Comandos</h3>
+ <p>Aceita texto puro ou JSON, tanto faz:</p>
+ <pre><code><span class="tok-c"># texto puro</span>
+feed 2          <span class="tok-c"># alimenta 2 porções (respeita as travas)</span>
+jog 1600        <span class="tok-c"># gira a rosca (negativo recua)</span>
+status          <span class="tok-c"># força a publicação do status agora</span>
+reboot
+
+<span class="tok-c"># ou JSON</span>
+{"cmd":"feed","p":2}
+{"cmd":"jog","steps":-800}</code></pre>
+
+ <h3>Exemplo com mosquitto_pub</h3>
+ <pre><code><span class="tok-c"># alimentar de qualquer lugar do mundo</span>
+mosquitto_pub -h SEU-BROKER.hivemq.cloud -p 8883 --capath /etc/ssl/certs \
+  -u usuario -P senha -t aquafeeder/cmd -m "feed 2"
+
+<span class="tok-c"># acompanhar tudo que o alimentador diz</span>
+mosquitto_sub -h SEU-BROKER.hivemq.cloud -p 8883 --capath /etc/ssl/certs \
+  -u usuario -P senha -t 'aquafeeder/#' -v</code></pre>
+
+ <h3>Exemplo de status</h3>
+ <pre><code>{
+  "porcoes_hoje": 4, "limite_dia": 10,
+  "ultima": "23/08 18:00", "ocupado": false,
+  "total": 812, "rssi": -58, "ip": "192.168.0.42",
+  "uptime_s": 86400, "heap": 214532, "fw": "1.0.0"
+}</code></pre>
+
+ <div class="warn"><b>Nota de segurança:</b> o firmware usa <code>setInsecure()</code> no
+ TLS, ou seja, não valida o certificado do broker — igual ao que faz com o Telegram. Para
+ um aparelho doméstico que só fala com um broker seu, o risco é baixo, mas está dito. Use
+ usuário e senha fortes no broker: quem publicar em <code>aquafeeder/cmd</code> alimenta
+ seus peixes.</div>
+
+ <div class="note">As travas de segurança valem igual para o MQTT: limite de porções por
+ dia, máximo por acionamento e intervalo mínimo. Comando barrado responde em
+ <code>aquafeeder/evento</code> com <code>{"erro":"..."}</code>.</div>
 </section>
 
 <section id="erros">

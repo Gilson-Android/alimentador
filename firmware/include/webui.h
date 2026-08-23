@@ -167,6 +167,21 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
   <div class="hint">Comandos: /alimentar [n] &middot; /foto &middot; /status &middot; /agenda</div>
  </div>
  <div class="card">
+  <label>MQTT (comando pela nuvem)</label>
+  <div class="grid">
+   <div><label>Broker</label><input id="c_mqh" placeholder="vazio = desligado"></div>
+   <div><label>Porta</label><input id="c_mqp" type="number" min="1" max="65535"></div>
+   <div><label>Usuario</label><input id="c_mqu"></div>
+   <div><label>Senha</label><input id="c_mqw" type="password" placeholder="(nao alterar)"></div>
+   <div><label>Prefixo dos topicos</label><input id="c_mqx"></div>
+   <div><label>TLS</label><select id="c_mqt"><option value="1">Sim (8883)</option><option value="0">Nao (1883)</option></select></div>
+  </div>
+  <div class="hint">O aparelho conecta <b>para fora</b> no broker e fica escutando
+  <code>prefixo/cmd</code>. Publique <code>feed 2</code> ali e ele alimenta. O broker
+  publica <code>prefixo/online</code> = 0 sozinho se o alimentador cair — é o alarme
+  de "parou de funcionar" que o Telegram não te dá.</div>
+ </div>
+ <div class="card">
   <label>Rede e sistema</label>
   <div class="grid">
    <div><label>Wi-Fi (SSID)</label><input id="c_ssid"></div>
@@ -301,6 +316,9 @@ function fillCfg(c){
  $('#c_csz').value=c.camSize;           $('#c_cq').value=c.camQuality;
  $('#c_cv').value=c.camVflip?1:0;       $('#c_ch').value=c.camHmirror?1:0;
  $('#c_cext').value=c.camExtUrl||'';
+ $('#c_mqh').value=c.mqttHost||''; $('#c_mqp').value=c.mqttPort||8883;
+ $('#c_mqu').value=c.mqttUser||''; $('#c_mqx').value=c.mqttPrefix||'aquafeeder';
+ $('#c_mqt').value=c.mqttTls?1:0;
  $('#c_tgc').value=c.tgChat||'';        $('#c_tgn').value=c.tgNotify?1:0;
  $('#c_ssid').value=c.ssid||'';         $('#c_host').value=c.host||'';
  $('#c_tz').value=c.tz||'';
@@ -314,11 +332,15 @@ async function saveCfg(){
   camSize:+$('#c_csz').value,camQuality:+$('#c_cq').value,
   camVflip:$('#c_cv').value=='1',camHmirror:$('#c_ch').value=='1',
   camExtUrl:$('#c_cext').value,
+  mqttHost:$('#c_mqh').value,mqttPort:+$('#c_mqp').value,
+  mqttUser:$('#c_mqu').value,mqttPrefix:$('#c_mqx').value,
+  mqttTls:$('#c_mqt').value=='1',
   tgChat:$('#c_tgc').value,tgNotify:$('#c_tgn').value=='1',
   ssid:$('#c_ssid').value,host:$('#c_host').value,tz:$('#c_tz').value};
  if($('#c_tgt').value) b.tgToken=$('#c_tgt').value;
  if($('#c_wpass').value) b.pass=$('#c_wpass').value;
  if($('#c_ui').value) b.uiPass=$('#c_ui').value;
+ if($('#c_mqw').value) b.mqttPass=$('#c_mqw').value;
  try{const r=await api('/api/config',{method:'POST',body:JSON.stringify(b)});
   toast(r.reboot?'Salvo. Reiniciando...':'Ajustes salvos')}catch(e){toast(e.message,1)}
 }
