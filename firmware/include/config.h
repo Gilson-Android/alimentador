@@ -63,6 +63,13 @@
   #define MOTOR_DRIVER DRV_ULN2003
 #endif
 
+// Frequencia do clock da camera. 20 MHz e o padrao. Se voce ligou o OV2640
+// na mao, com jumpers, e a imagem sai listrada/verde, caia para 10000000 --
+// fio comprido em barramento paralelo de 20 MHz e a causa numero 1 disso.
+#ifndef CAM_XCLK_HZ
+  #define CAM_XCLK_HZ 20000000
+#endif
+
 // ------------------------------------------------------------ mecanica
 #if MOTOR_DRIVER == DRV_STEPDIR
   // NEMA 17: 200 passos/volta. Deixe o driver em 1/8 de micropasso

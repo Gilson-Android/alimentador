@@ -158,6 +158,41 @@ negativo.
 - 28BYJ-48 / ULN2003: **470–1000 µF** entre 5 V e GND
 - NEMA 17 / DRV8825: **100 µF** entre VMOT e GND
 
+### Ligar o OV2640 na mão (placa sem conector de flat)
+
+Se a sua placa é uma **ESP32-S3-DevKitC-1 / YD-ESP32-S3** (módulo N16R8, por
+exemplo), ela não tem o conector de 24 vias. Dá para usar um módulo OV2640
+avulso ligando 14 fios no header. Os pinos abaixo são **exatamente** os que o
+firmware já espera (`FEEDER_BOARD=1`), então não precisa mexer em código:
+
+| Módulo OV2640 | ESP32-S3 | | Módulo OV2640 | ESP32-S3 |
+|---|---|---|---|---|
+| `SIOD` / SDA | GPIO 4 | | `D0` / Y2 | GPIO 11 |
+| `SIOC` / SCL | GPIO 5 | | `D1` / Y3 | GPIO 9 |
+| `VSYNC` | GPIO 6 | | `D2` / Y4 | GPIO 8 |
+| `HREF` | GPIO 7 | | `D3` / Y5 | GPIO 10 |
+| `PCLK` | GPIO 13 | | `D4` / Y6 | GPIO 12 |
+| `XCLK` | GPIO 15 | | `D5` / Y7 | GPIO 18 |
+| `3V3` | 3V3 | | `D6` / Y8 | GPIO 17 |
+| `GND` | GND | | `D7` / Y9 | GPIO 16 |
+
+`PWDN` e `RESET` ficam sem ligar.
+
+**O barramento é paralelo a 20 MHz — fio comprido não perdoa.** Regras:
+
+- fios de no máximo **10 cm**, de preferência 5;
+- mantenha os 8 fios de dados juntos e o `GND` junto deles;
+- não passe o cabo do motor em paralelo com esses fios;
+- imagem listrada, verde ou "chuviscada" = ruído no barramento. Antes de
+  desistir, compile com `-DCAM_XCLK_HZ=10000000` (metade do clock). Resolve na
+  maioria dos casos, com pequena perda de taxa de quadros.
+
+Se ficar muito ruim, o plano B é a **URL de câmera externa** em
+*Ajustes → Câmera* — um celular velho com o app *IP Webcam* dá imagem melhor
+que qualquer OV2640, sem fio nenhum.
+
+Compile com `pio run -e devkitc_s3_n16r8_nema17 -t upload`.
+
 ## Sensor de grãos (opcional, mas recomendado para viagem)
 
 Confirma que a ração realmente caiu. Sem ele, o alimentador "acha" que alimentou

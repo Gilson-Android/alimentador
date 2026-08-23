@@ -33,7 +33,7 @@ bool cameraInit() {
     c.pin_sccb_scl = SIOC_GPIO_NUM;
     c.pin_pwdn  = PWDN_GPIO_NUM;
     c.pin_reset = RESET_GPIO_NUM;
-    c.xclk_freq_hz = 20000000;
+    c.xclk_freq_hz = CAM_XCLK_HZ;
     c.pixel_format = PIXFORMAT_JPEG;
     c.grab_mode    = CAMERA_GRAB_LATEST;
 

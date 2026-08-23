@@ -983,6 +983,8 @@ pio device monitor</code></pre>
    <tr><td><code>freenove_s3_cam_nema17</code></td><td>a mesma placa + NEMA 17 (STEP/DIR)</td></tr>
    <tr><td><code>xiao_s3_sense</code></td><td>Seeed XIAO ESP32S3 Sense + 28BYJ-48</td></tr>
    <tr><td><code>xiao_s3_sense_nema17</code></td><td>XIAO + NEMA 17</td></tr>
+   <tr><td><code>devkitc_s3_n16r8</code></td><td>ESP32-S3-DevKitC-1 / YD-ESP32-S3 (módulo N16R8) + 28BYJ-48</td></tr>
+   <tr><td><code>devkitc_s3_n16r8_nema17</code></td><td>a mesma placa + NEMA 17</td></tr>
    <tr><td><code>s3_sem_camera</code></td><td>ESP32-S3 genérico, sem câmera</td></tr>
   </tbody>
  </table>
@@ -997,6 +999,33 @@ esptool.py --chip esp32s3 --port COM5 --baud 921600 write_flash -z \
  USB-serial), não pela USB nativa — é onde o log serial também aparece. Se a gravação
  falhar: segure BOOT, toque RESET, solte BOOT e tente de novo.</div>
 
+
+ <h3>Placa sem conector de flat? Ligue o OV2640 na mão</h3>
+ <p>Placas <b>ESP32-S3-DevKitC-1 / YD-ESP32-S3</b> (módulo N16R8 e parecidos) não têm o
+ conector de 24 vias. Dá para usar um módulo OV2640 avulso ligando 14 fios no header —
+ e nos <b>mesmos pinos</b> que o firmware já espera, sem mexer em código:</p>
+ <table>
+  <thead><tr><th>OV2640</th><th>ESP32-S3</th><th>OV2640</th><th>ESP32-S3</th></tr></thead>
+  <tbody>
+   <tr><td><code>SIOD</code> / SDA</td><td><b>GPIO 4</b></td><td><code>D0</code> / Y2</td><td><b>GPIO 11</b></td></tr>
+   <tr><td><code>SIOC</code> / SCL</td><td><b>GPIO 5</b></td><td><code>D1</code> / Y3</td><td><b>GPIO 9</b></td></tr>
+   <tr><td><code>VSYNC</code></td><td><b>GPIO 6</b></td><td><code>D2</code> / Y4</td><td><b>GPIO 8</b></td></tr>
+   <tr><td><code>HREF</code></td><td><b>GPIO 7</b></td><td><code>D3</code> / Y5</td><td><b>GPIO 10</b></td></tr>
+   <tr><td><code>PCLK</code></td><td><b>GPIO 13</b></td><td><code>D4</code> / Y6</td><td><b>GPIO 12</b></td></tr>
+   <tr><td><code>XCLK</code></td><td><b>GPIO 15</b></td><td><code>D5</code> / Y7</td><td><b>GPIO 18</b></td></tr>
+   <tr><td><code>3V3</code></td><td>3V3</td><td><code>D6</code> / Y8</td><td><b>GPIO 17</b></td></tr>
+   <tr><td><code>GND</code></td><td>GND</td><td><code>D7</code> / Y9</td><td><b>GPIO 16</b></td></tr>
+  </tbody>
+ </table>
+ <p><code>PWDN</code> e <code>RESET</code> ficam sem ligar.</p>
+ <div class="warn"><b>O barramento é paralelo a 20 MHz — fio comprido não perdoa.</b>
+ Máximo 10 cm (de preferência 5), os 8 fios de dados juntos com o GND, e não passe o cabo
+ do motor em paralelo com eles. Imagem listrada, esverdeada ou chuviscada é ruído no
+ barramento: antes de desistir compile com <code>-DCAM_XCLK_HZ=10000000</code> (metade do
+ clock). Resolve na maioria dos casos.</div>
+ <div class="note">Plano B honesto: um <b>celular velho</b> com o app <i>IP Webcam</i>
+ colado no aquário dá imagem melhor que qualquer OV2640 e não tem fio nenhum. Cole a URL
+ em <i>Ajustes → Câmera → Câmera externa</i>.</div>
  <h3>Primeiro boot</h3>
  <ol>
   <li>Não há Wi-Fi salvo, então o aparelho sobe em <b>modo configuração</b>: procure a
