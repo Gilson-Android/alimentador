@@ -602,15 +602,15 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
   <circle cx="596" cy="266" r="4" fill="#8b98a5"/><text class="tp" x="608" y="270">M2</text>
   <circle cx="596" cy="306" r="4" fill="#c678dd"/><text class="tp" x="608" y="310">RST</text>
   <circle cx="596" cy="336" r="4" fill="#c678dd"/><text class="tp" x="608" y="340">SLP</text>
-  <circle cx="596" cy="376" r="4" fill="#3ddc97"/><text class="tp" x="608" y="380">STEP</text>
+  <circle cx="596" cy="376" r="4" fill="#3ddc97"/><text class="tp" x="608" y="380">STP</text>
   <circle cx="596" cy="406" r="4" fill="#4c9aff"/><text class="tp" x="608" y="410">DIR</text>
   <circle cx="746" cy="176" r="4" fill="#ff6b6b"/><text class="tp" x="734" y="180" text-anchor="end">VMOT</text>
   <circle cx="746" cy="206" r="4" fill="#8b98a5"/><text class="tp" x="734" y="210" text-anchor="end">GND</text>
-  <circle cx="746" cy="246" r="4" fill="#ff8fd0"/><text class="tp" x="734" y="250" text-anchor="end">B2</text>
-  <circle cx="746" cy="276" r="4" fill="#ff8fd0"/><text class="tp" x="734" y="280" text-anchor="end">B1</text>
-  <circle cx="746" cy="306" r="4" fill="#7ee8fa"/><text class="tp" x="734" y="310" text-anchor="end">A1</text>
-  <circle cx="746" cy="336" r="4" fill="#7ee8fa"/><text class="tp" x="734" y="340" text-anchor="end">A2</text>
-  <text class="tp" x="734" y="380" text-anchor="end" fill="#6b7885">FAULT</text>
+  <circle cx="746" cy="246" r="4" fill="#ff8fd0"/><text class="tp" x="734" y="250" text-anchor="end">2B</text>
+  <circle cx="746" cy="276" r="4" fill="#ff8fd0"/><text class="tp" x="734" y="280" text-anchor="end">1B</text>
+  <circle cx="746" cy="306" r="4" fill="#7ee8fa"/><text class="tp" x="734" y="310" text-anchor="end">1A</text>
+  <circle cx="746" cy="336" r="4" fill="#7ee8fa"/><text class="tp" x="734" y="340" text-anchor="end">2A</text>
+  <text class="tp" x="734" y="380" text-anchor="end" fill="#6b7885">FLT</text>
   <circle cx="746" cy="406" r="4" fill="#8b98a5"/><text class="tp" x="734" y="410" text-anchor="end">GND</text>
   <circle cx="671" cy="424" r="13" fill="#0e1319" stroke="#8c3a45" stroke-width="1.6"/>
   <line x1="671" y1="414" x2="671" y2="434" stroke="#c8d6e2" stroke-width="2"/>
@@ -687,7 +687,7 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  <table>
   <thead><tr><th>Pino do DRV8825</th><th>Ligar em</th><th>Observação</th></tr></thead>
   <tbody>
-   <tr><td>STEP</td><td><b>GPIO 1</b></td><td></td></tr>
+   <tr><td><b>STP</b> (STEP)</td><td><b>GPIO 1</b></td><td></td></tr>
    <tr><td>DIR</td><td><b>GPIO 2</b></td><td></td></tr>
    <tr><td>EN</td><td><b>GPIO 41</b></td><td>ativo em nível baixo; o firmware solta o motor quando para</td></tr>
    <tr><td>M0, M1</td><td>3V3 do ESP32</td><td>M2=0 M1=1 M0=1 → <b>1/8 de micropasso</b></td></tr>
@@ -695,8 +695,8 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
    <tr><td>RST, SLP</td><td>3V3 do ESP32</td><td>os dois; sem isso o driver fica em reset</td></tr>
    <tr><td>VMOT + GND (de cima)</td><td>+12 V da fonte</td><td><b>100 µF eletrolítico direto nesses dois pinos</b></td></tr>
    <tr><td>GND (de baixo)</td><td>GND comum</td><td>mesmo GND do ESP32 e da fonte</td></tr>
-   <tr><td>A1 A2 / B1 B2</td><td>bobinas do motor</td><td>A1+A2 são a <b>mesma</b> bobina; B1+B2 a outra</td></tr>
-   <tr><td>FAULT</td><td>—</td><td>deixe solto</td></tr>
+   <tr><td>1A + 2A</td><td>uma bobina</td><td>na sua placa os dois pinos de cada bobina são <b>vizinhos</b>: 2A/1A juntos e 1B/2B juntos</td></tr><tr><td>1B + 2B</td><td>a outra bobina</td><td>vermelho+azul de um lado, preto+verde do outro (confirme com o multímetro)</td></tr>
+   <tr><td><b>FLT</b> (FAULT)</td><td>—</td><td>deixe solto</td></tr>
   </tbody>
  </table>
 
@@ -712,10 +712,12 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  DRV8825; no A4988 é <code>corrente × 0,8</code>).
  <br>0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.</div>
 
- <div class="note"><b>Descobrir os pares de bobina:</b> meça continuidade com o
- multímetro. Os dois fios que têm continuidade entre si são uma bobina — vão em A1/A2. Os
- outros dois vão em B1/B2. Se o motor vibrar no lugar sem girar, você misturou os pares:
- troque A2 com B1.</div>
+ <div class="note"><b>Descobrir os pares de bobina — faça isso, não confie na cor.</b>
+ Ponha o multímetro em continuidade (ou ohms) e toque dois fios do motor por vez. O par
+ que apitar (ou marcar 2–4 Ω) é uma bobina; vai em <b>1A + 2A</b>. O outro par vai em
+ <b>1B + 2B</b>. Em motor de impressora com fios vermelho/preto/azul/verde o mais comum é
+ <b>preto+verde</b> numa bobina e <b>vermelho+azul</b> na outra — mas clone é clone,
+ meça. Se o motor vibrar no lugar sem girar, você misturou os pares: troque 2A com 1B.</div>
 
  <div class="note">Outros drivers: <b>A4988</b> → MS1 e MS2 em 3V3, MS3 em GND, e ele
  <i>precisa</i> de VDD em 3V3. <b>TMC2208/2209</b> → MS1 e MS2 em GND (já é 1/8 de

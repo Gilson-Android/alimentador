@@ -59,18 +59,24 @@ Compile com `pio run -e freenove_s3_cam -t upload`.
    B1 B2 ──► bobina 2 do motor
 ```
 
-| Pino do DRV8825 | Ligar em | Observação |
+Os nomes abaixo são os da **serigrafia da placa** (clone azul/roxo da Pololu):
+
+| Pino (serigrafia) | Ligar em | Observação |
 |---|---|---|
-| STEP | GPIO 1 | |
-| DIR | GPIO 2 | |
-| EN | GPIO 41 | ativo em nível baixo; o firmware solta o motor quando para |
-| M0, M1 | 3V3 do ESP32 | M2=0 M1=1 M0=1 → **1/8 de micropasso** |
-| M2 | GND | idem |
-| RST, SLP | 3V3 do ESP32 | os dois; sem isso o driver fica em reset |
-| VMOT + GND (de cima) | +12 V da fonte | **100 µF eletrolítico direto nesses dois pinos** |
-| GND (de baixo) | GND comum | mesmo GND do ESP32 e da fonte |
-| A1 A2 / B1 B2 | bobinas do motor | A1+A2 são a **mesma** bobina; B1+B2 a outra |
-| FAULT | — | deixe solto |
+|  | GPIO 1 | é o STEP |
+| api.html  cad  docs  firmware  index.html  README.md  stl | GPIO 2 | |
+|  | GPIO 41 | ativo em nível baixo; o firmware solta o motor quando para |
+| ,  | 3V3 do ESP32 | M2=0 M1=1 M0=1 → **1/8 de micropasso** |
+|  | GND | idem |
+| ,  | 3V3 do ESP32 | os dois; sem isso o driver fica em reset |
+|  +  vizinho | +12 V da fonte | **100 µF eletrolítico direto nesses dois pinos** |
+|  (o outro) | GND comum | mesmo GND do ESP32 e da fonte |
+|  +  | uma bobina do motor | os dois pinos de cada bobina são **vizinhos** na placa |
+|  +  | a outra bobina | |
+|  | — | é o FAULT; deixe solto |
+
+A ordem física dos 4 pinos de motor na placa é : os dois de cima são
+uma bobina, os dois de baixo são a outra.
 
 **O DRV8825 não tem pino VDD.** Diferente do A4988, ele gera a lógica dele
 internamente a partir do VMOT — não existe fio de 3,3 V *alimentando* o driver. O
@@ -87,11 +93,16 @@ trimpot e o GND:
 
 0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.
 
-### Achar os pares de bobina
+### Achar os pares de bobina (não confie na cor)
 
-Meça continuidade com o multímetro: os dois fios que têm continuidade entre si
-são uma bobina, e vão em A1/A2. Os outros dois vão em B1/B2. Se o motor vibrar no
-lugar sem girar, você misturou os pares — troque A2 com B1.
+Multímetro em continuidade (ou ohms) e toque dois fios do motor por vez. O par que
+apitar — ou marcar 2 a 4 Ω — é uma bobina, e vai em **1A + 2A**. O outro par vai em
+**1B + 2B**.
+
+Em motor de impressora com fios **vermelho / preto / azul / verde**, o mais comum é
+ numa bobina e  na outra. Mas clone é clone: meça.
+
+Se o motor vibrar no lugar sem girar, você misturou os pares — troque  com .
 
 ### Outros drivers
 
