@@ -1,0 +1,11 @@
+# build do PlatformIO (regerado com: pio run)
+firmware/.pio/
+
+# saidas do fatiador
+*.gcode
+*.3mf
+
+# lixo de sistema
+Thumbs.db
+desktop.ini
+.DS_Store

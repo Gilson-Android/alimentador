@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AquaFeeder ESP32-S3 — alimentador de aquário com câmera</title>
+<meta name="description" content="Guia completo de montagem do AquaFeeder: alimentador automático de aquário com ESP32-S3, rosca sem-fim impressa em 3D, agenda de horários, câmera e controle por Telegram.">
+<style>
+:root{
+  --bg:#0d1117; --bg2:#111820; --card:#161d26; --line:#232c38; --line2:#2f3a48;
+  --fg:#e6edf3; --dim:#8b98a5; --dim2:#6b7885;
+  --acc:#3ddc97; --acc2:#4c9aff; --warn:#ffb454; --err:#ff6b6b; --mag:#c678dd;
+  --mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--acc2);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.88em;background:#1c2530;padding:.12em .4em;
+  border-radius:5px;color:#a9e6c8;border:1px solid var(--line)}
+h1,h2,h3{line-height:1.25;margin:0}
+
+/* ---------- topbar ---------- */
+header{position:sticky;top:0;z-index:40;background:rgba(13,17,23,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{max-width:1240px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.2px}
+.logo b{color:var(--acc)}
+.fish{width:24px;height:24px;flex:0 0 auto}
+.top nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+.top nav a{color:var(--dim);font-size:13.5px;padding:6px 10px;border-radius:7px}
+.top nav a:hover{color:var(--fg);background:var(--card);text-decoration:none}
+.gh{border:1px solid var(--line2)!important}
+#burger{display:none;background:none;border:1px solid var(--line2);color:var(--fg);
+  border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px;display:grid;
+  grid-template-columns:232px 1fr;gap:38px;align-items:start}
+aside{position:sticky;top:70px;padding:26px 0;max-height:calc(100vh - 70px);overflow-y:auto}
+aside ol{list-style:none;margin:0;padding:0;counter-reset:s}
+aside li{counter-increment:s}
+aside li a{display:block;padding:6px 10px 6px 30px;font-size:13.5px;color:var(--dim);
+  border-left:2px solid var(--line);position:relative;border-radius:0 6px 6px 0}
+aside li a::before{content:counter(s);position:absolute;left:9px;font-size:11px;
+  color:var(--dim2);font-family:var(--mono)}
+aside li a:hover{color:var(--fg);background:var(--card);text-decoration:none}
+aside li a.on{color:var(--acc);border-left-color:var(--acc);background:#12211b}
+main{padding:26px 0 90px;min-width:0}
+
+/* ---------- hero ---------- */
+.hero{border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  background:linear-gradient(160deg,#141d27,#0f151c);margin-bottom:14px}
+.hero-in{padding:34px 30px}
+.hero h1{font-size:clamp(26px,4.4vw,40px);letter-spacing:-1px}
+.hero p{color:var(--dim);font-size:17px;max-width:60ch;margin:12px 0 0}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{font-size:12.5px;padding:5px 11px;border-radius:99px;border:1px solid var(--line2);
+  color:var(--dim);background:#131a22}
+.pill b{color:var(--fg);font-weight:600}
+.hero img{width:100%;display:block;border-top:1px solid var(--line)}
+
+/* ---------- blocos ---------- */
+section{padding:44px 0 8px;border-top:1px solid var(--line);margin-top:34px}
+section:first-of-type{border:0;margin-top:0}
+.kicker{font-family:var(--mono);font-size:12px;color:var(--acc);letter-spacing:.14em;
+  text-transform:uppercase}
+section h2{font-size:clamp(21px,3vw,29px);letter-spacing:-.5px;margin:7px 0 14px}
+section h3{font-size:17.5px;margin:26px 0 8px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:5px 0}
+.lead{font-size:17px;color:#c9d4de}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:18px 20px;margin:16px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.note{border-left:3px solid var(--acc2);background:#101a26;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:16px 0;font-size:15px}
+.warn{border-left:3px solid var(--warn);background:#1e1809;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:16px 0;font-size:15px}
+.danger{border-left:3px solid var(--err);background:#211011;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:16px 0;font-size:15px}
+.note b,.warn b,.danger b{color:var(--fg)}
+
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px;display:block;
+  overflow-x:auto}
+th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;
+  font-weight:600;white-space:nowrap}
+tbody tr:hover{background:#141b24}
+td b{color:var(--acc)}
+
+pre{background:#0b0f14;border:1px solid var(--line);border-radius:11px;padding:15px 16px;
+  overflow-x:auto;margin:14px 0;position:relative}
+pre code{background:none;border:0;padding:0;color:#c8d6e2;font-size:13.2px;line-height:1.6}
+.cp{position:absolute;top:8px;right:8px;background:#1c2530;border:1px solid var(--line2);
+  color:var(--dim);border-radius:7px;font-size:11px;padding:4px 9px;cursor:pointer;
+  font-family:inherit}
+.cp:hover{color:var(--fg);border-color:var(--acc)}
+.tok-c{color:#6b7885}.tok-k{color:#c678dd}.tok-s{color:#98c379}
+
+figure{margin:18px 0}
+figure img{width:100%;border:1px solid var(--line);border-radius:12px;display:block;
+  background:#0b0f14;cursor:zoom-in}
+figcaption{color:var(--dim);font-size:13px;margin-top:8px;text-align:center}
+
+/* ---------- seletor de motor ---------- */
+.motorbar{position:sticky;top:57px;z-index:30;background:rgba(13,17,23,.95);
+  backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:11px;
+  padding:11px 14px;margin:0 0 6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.motorbar span{font-size:13.5px;color:var(--dim)}
+.seg{display:flex;background:#0b0f14;border:1px solid var(--line2);border-radius:9px;
+  overflow:hidden}
+.seg button{background:none;border:0;color:var(--dim);padding:7px 14px;font-size:13.5px;
+  cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--acc);color:#07130d;font-weight:650}
+.only-28byj,.only-nema17{display:none}
+body[data-motor="28BYJ"] .only-28byj{display:revert}
+body[data-motor="NEMA17"] .only-nema17{display:revert}
+
+/* ---------- interativos ---------- */
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.calc label{font-size:12px;color:var(--dim);display:block;margin-bottom:4px}
+.calc input,.calc select{width:100%;background:#0b0f14;border:1px solid var(--line2);
+  color:var(--fg);border-radius:8px;padding:9px;font-family:var(--mono);font-size:14px}
+.out{font-size:27px;font-weight:700;color:var(--acc);font-family:var(--mono)}
+.chk{list-style:none;padding:0}
+.chk li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;
+  border-bottom:1px solid var(--line)}
+.chk input{margin-top:5px;accent-color:var(--acc);width:17px;height:17px;flex:0 0 auto}
+.chk label{cursor:pointer;font-size:15px}
+.chk input:checked + label{color:var(--dim2);text-decoration:line-through}
+details{border:1px solid var(--line);border-radius:11px;margin:9px 0;background:var(--card)}
+details summary{padding:13px 17px;cursor:pointer;font-weight:600;font-size:15.5px}
+details summary::marker{color:var(--acc)}
+details[open] summary{border-bottom:1px solid var(--line)}
+details .in{padding:14px 17px}
+.tag{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;
+  border:1px solid var(--line2);color:var(--dim)}
+.tag.get{color:var(--acc);border-color:#2b6a4f}
+.tag.post{color:var(--warn);border-color:#6a5227}
+
+footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2);
+  font-size:13.5px;text-align:center}
+
+#lb{position:fixed;inset:0;background:rgba(5,8,11,.94);display:none;place-items:center;
+  z-index:99;padding:24px;cursor:zoom-out}
+#lb.on{display:grid}
+#lb img{max-width:100%;max-height:100%;border-radius:10px}
+
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0}
+  aside{position:static;max-height:none;padding:0;display:none;border-bottom:1px solid var(--line)}
+  aside.open{display:block;padding:12px 0}
+  #burger{display:block}
+  .top nav a:not(.gh){display:none}
+  .grid2{grid-template-columns:1fr}
+  .motorbar{top:57px}
+}
+</style>
+</head>
+<body data-motor="28BYJ">
+
+<header>
+ <div class="top">
+  <button id="burger" aria-label="menu">☰</button>
+  <div class="logo">
+   <svg class="fish" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="1.7">
+    <path d="M2 12c3-4 7-6 11-6 4 0 6 2 8 6-2 4-4 6-8 6-4 0-8-2-11-6z"/>
+    <circle cx="16.5" cy="10.5" r="1" fill="#3ddc97" stroke="none"/>
+    <path d="M2 12l3-3M2 12l3 3"/>
+   </svg>
+   Aqua<b>Feeder</b>
+  </div>
+  <nav>
+   <a href="#comprar">Comprar</a>
+   <a href="#imprimir">Imprimir</a>
+   <a href="#eletronica">Ligar</a>
+   <a href="#firmware">Gravar</a>
+   <a href="api.html">API</a>
+   <a class="gh" href="https://github.com/Gilson-Android/alimentador">GitHub</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap">
+<aside id="side">
+ <ol>
+  <li><a href="#visao">Visão geral</a></li>
+  <li><a href="#funciona">Como funciona</a></li>
+  <li><a href="#motor">Qual motor usar</a></li>
+  <li><a href="#comprar">Lista de compras</a></li>
+  <li><a href="#imprimir">Impressão 3D</a></li>
+  <li><a href="#eletronica">Eletrônica</a></li>
+  <li><a href="#montagem">Montagem</a></li>
+  <li><a href="#firmware">Firmware</a></li>
+  <li><a href="#calibrar">Calibração</a></li>
+  <li><a href="#remoto">Fora de casa</a></li>
+  <li><a href="api.html">API HTTP</a></li>
+  <li><a href="#viagem">Antes de viajar</a></li>
+  <li><a href="#problemas">Problemas</a></li>
+ </ol>
+</aside>
+
+<main>
+
+<div class="hero">
+ <div class="hero-in">
+  <h1>Alimentador de aquário<br>com ESP32-S3 e câmera</h1>
+  <p>Agenda de horários, acionamento manual de qualquer lugar do mundo e uma câmera
+  para conferir se está tudo bem. Todas as peças saem da impressora 3D e o firmware
+  é um único ESP32-S3.</p>
+  <div class="pills">
+   <span class="pill"><b>~240 g</b> de PETG</span>
+   <span class="pill"><b>~R$ 200</b> no total</span>
+   <span class="pill">reservatório <b>300 ml</b></span>
+   <span class="pill">dose de <b>0,23 ml</b></span>
+   <span class="pill">Telegram + <b>API HTTP</b></span>
+   <span class="pill">firmware <b>OTA</b></span>
+  </div>
+ </div>
+ <img src="docs/img/montagem.png" alt="AquaFeeder montado na borda do aquário">
+</div>
+
+<div class="motorbar">
+ <span>Escolha o seu motor — o guia se adapta:</span>
+ <div class="seg">
+  <button data-m="28BYJ" class="on">28BYJ-48 (5 V)</button>
+  <button data-m="NEMA17">NEMA 17 (12 V)</button>
+ </div>
+</div>
+
+<!-- =================================================== -->
+<section id="visao">
+ <div class="kicker">01 — Visão geral</div>
+ <h2>O que essa máquina faz</h2>
+ <p class="lead">Um funil de 300 ml despeja ração numa rosca sem-fim. A rosca gira um
+ ângulo exato e entrega uma dose exata. Um ESP32-S3 controla o horário, expõe uma
+ interface web na sua rede, aceita comandos pelo Telegram e mostra o aquário pela câmera.</p>
+
+ <table>
+  <thead><tr><th>Recurso</th><th>Como</th></tr></thead>
+  <tbody>
+   <tr><td><b>Agenda</b></td><td>Até 8 horários, com dias da semana e porções por horário</td></tr>
+   <tr><td><b>Alimentar agora</b></td><td>Interface web, comando no Telegram ou o botão BOOT da placa</td></tr>
+   <tr><td><b>Câmera</b></td><td>Foto sob demanda e vídeo MJPEG ao vivo</td></tr>
+   <tr><td><b>Fora de casa</b></td><td>Bot do Telegram — sem abrir porta no roteador</td></tr>
+   <tr><td><b>Queda de luz</b></td><td>Recupera a refeição perdida quando a energia volta</td></tr>
+   <tr><td><b>Anti-entupimento</b></td><td>Recua a rosca antes de cada dose; sensor de grãos opcional avisa se nada caiu</td></tr>
+   <tr><td><b>Travas</b></td><td>Limite de porções por dia, por acionamento e intervalo mínimo</td></tr>
+   <tr><td><b>Atualização</b></td><td>OTA pela rede depois da primeira gravação</td></tr>
+  </tbody>
+ </table>
+
+ <div class="danger"><b>Antes de qualquer coisa:</b> comida em excesso mata mais peixe
+ que fome. Peixe tropical adulto saudável passa 5 a 7 dias sem comer tranquilamente.
+ Configure com parcimônia — a trava de porções por dia existe exatamente por isso.</div>
+</section>
+
+<!-- =================================================== -->
+<section id="funciona">
+ <div class="kicker">02 — Princípio</div>
+ <h2>Por que rosca sem-fim</h2>
+ <p>Existem três mecanismos comuns em alimentadores: tambor rotativo, disco com fatia e
+ rosca sem-fim (<i>auger</i>). A rosca ganha aqui por três motivos:</p>
+ <ul>
+  <li><b>Dose proporcional ao ângulo.</b> Meia volta entrega metade. Dá para dosar 0,2 ml
+  com repetibilidade, o que é impossível num tambor.</li>
+  <li><b>Veda umidade.</b> O tubo cheio de ração é uma barreira física entre o ar úmido
+  do aquário e o reservatório.</li>
+  <li><b>Não escorre sozinha.</b> Com o tubo na horizontal, a ração só anda quando a
+  rosca gira.</li>
+ </ul>
+
+ <figure>
+  <img src="docs/img/corte.png" alt="Corte mostrando a rosca dentro do tubo">
+  <figcaption>Corte no meio do tubo: o funil entrega ração na janela de entrada, a
+  hélice transporta e a calha (verde) despeja acima da água.</figcaption>
+ </figure>
+
+ <h3>Os números do projeto</h3>
+ <table>
+  <thead><tr><th>Grandeza</th><th>Valor</th><th>De onde vem</th></tr></thead>
+  <tbody>
+   <tr><td>Diâmetro da hélice</td><td>14 mm</td><td>núcleo 6 mm → folga radial de 4 mm, passa grão de até 3 mm</td></tr>
+   <tr><td>Passo da hélice</td><td>9 mm</td><td>avanço por volta</td></tr>
+   <tr><td>Volume por volta</td><td><b>0,93 ml</b></td><td>área do canal 125,7 mm² × (passo − aleta)</td></tr>
+   <tr><td>Porção padrão</td><td><b>0,23 ml</b></td><td>1/4 de volta (ajustável na interface)</td></tr>
+   <tr><td>Reservatório</td><td>~300 ml</td><td>funil de 25,6 → 86 mm em 95 mm de altura</td></tr>
+   <tr><td>Inclinação das paredes</td><td>72°</td><td>acima do ângulo de escoamento da ração seca</td></tr>
+  </tbody>
+ </table>
+
+ <div class="note"><b>Limitação honesta:</b> a rosca funciona muito bem com ração
+ granulada ou peletizada de até ~3 mm. Floco grande enrosca — amasse antes ou use
+ granulado. Se sua ração é grande, aumente <code>auger_od</code>,
+ <code>auger_core</code> e <code>auger_pitch</code> no <code>cad/common.scad</code> e
+ reimprima rosca e tubo.</div>
+</section>
+
+<!-- =================================================== -->
+<section id="motor">
+ <div class="kicker">03 — Decisão</div>
+ <h2>Qual motor usar</h2>
+ <p>O projeto suporta dois motores. Muda apenas <b>duas peças impressas</b> (as metades
+ do tubo e a rosca) e uma flag na compilação. Todo o resto é idêntico.</p>
+
+ <table>
+  <thead><tr><th></th><th>28BYJ-48 + ULN2003</th><th>NEMA 17 + A4988/DRV8825</th></tr></thead>
+  <tbody>
+   <tr><td>Alimentação</td><td><b>5 V</b>, a mesma do ESP32</td><td>12 V + conversor para 5 V</td></tr>
+   <tr><td>Peso</td><td><b>40 g</b></td><td>250–280 g pendurados na borda</td></tr>
+   <tr><td>Redução</td><td><b>1:64 embutida</b></td><td>nenhuma (mas tem torque de sobra)</td></tr>
+   <tr><td>Consumo</td><td><b>~250 mA</b></td><td>0,4–1 A, driver esquenta</td></tr>
+   <tr><td>Resolução</td><td>4096 passos/volta</td><td><b>1600</b> (1/8 de micropasso)</td></tr>
+   <tr><td>Ajuste do driver</td><td>nenhum</td><td>limite de corrente no trimpot</td></tr>
+   <tr><td>Custo</td><td>~R$ 20 o par</td><td>R$ 0 se você já tem os dois</td></tr>
+  </tbody>
+ </table>
+
+ <div class="note"><b>Recomendação:</b> se você já tem NEMA 17 <i>e</i> driver <i>e</i>
+ fonte 12 V, use o NEMA 17 — funciona muito bem. Se for precisar comprar driver e fonte
+ de qualquer jeito, o 28BYJ-48 sai mais barato e é tecnicamente mais adequado para esta
+ máquina: 5 V numa fonte só, leve, e com redução embutida.</div>
+
+ <div class="danger"><b>Motor de prato de micro-ondas: não use.</b> É 220 V da rede
+ elétrica. Não vale colocar tensão de rede a poucos centímetros da água num equipamento
+ que fica ligado sozinho enquanto você viaja — e ele só liga/desliga a 4-5 rpm fixo,
+ sem nenhum controle de dose.</div>
+
+ <div class="warn only-nema17"><b>Você escolheu NEMA 17.</b> O conjunto passa de ~400 g
+ para ~650 g pendurados na borda do aquário. Aperte bem a braçadeira e, se puder,
+ prefira apoiar o conjunto na tampa do aquário em vez de pendurar na borda.</div>
+</section>
+
+<!-- =================================================== -->
+<section id="comprar">
+ <div class="kicker">04 — Compras</div>
+ <h2>Lista de compras</h2>
+ <table>
+  <thead><tr><th>Item</th><th>Qtd</th><th>Preço aprox.</th></tr></thead>
+  <tbody>
+   <tr><td>Placa ESP32-S3 <b>com câmera</b> (kit Freenove ESP32-S3-WROOM CAM)</td><td>1</td><td>R$ 90–170</td></tr>
+   <tr class="only-28byj"><td>Motor 28BYJ-48 5 V + driver ULN2003</td><td>1</td><td>R$ 15–30</td></tr>
+   <tr class="only-nema17"><td>Motor NEMA 17 (reaproveitado de impressora)</td><td>1</td><td>—</td></tr>
+   <tr class="only-nema17"><td>Driver A4988, DRV8825 ou TMC2208</td><td>1</td><td>R$ 10–25</td></tr>
+   <tr class="only-28byj"><td>Fonte 5 V / 2 A (ou carregador USB + cabo)</td><td>1</td><td>R$ 25–45</td></tr>
+   <tr class="only-nema17"><td>Fonte 12 V / 2 A + conversor step-down para 5 V (MP1584/LM2596)</td><td>1</td><td>R$ 40–60</td></tr>
+   <tr><td>Capacitor eletrolítico 470–1000 µF <span class="only-nema17">(e 100 µF para o VMOT)</span></td><td>1–2</td><td>R$ 4</td></tr>
+   <tr><td>Cabo 4 vias / jumpers fêmea-fêmea</td><td>~1 m</td><td>R$ 10</td></tr>
+   <tr class="only-28byj"><td>Parafusos: M3×8 (3), M3×10 (8), M3×12 (2), M3×16 (2), M4×12 (2), M2×6 (2)</td><td>—</td><td>R$ 15</td></tr>
+   <tr class="only-nema17"><td>Parafusos: M3×8 (3), M3×10 (10, sendo 4 para o motor), M3×12 (2), M3×16 (2), M4×12 (2), M2×6 (2)</td><td>—</td><td>R$ 15</td></tr>
+   <tr><td>Parafuso M4×30 + porca M4 (aperto da braçadeira)</td><td>1</td><td>R$ 3</td></tr>
+   <tr><td>Filamento <b>PETG</b></td><td>~240 g</td><td>R$ 20</td></tr>
+   <tr><td><i>Opcional:</i> sensor óptico (LED IR + fototransistor 3 mm, ou TCRT5000)</td><td>1</td><td>R$ 8</td></tr>
+   <tr><td><i>Opcional:</i> sachê de sílica gel</td><td>1</td><td>R$ 2</td></tr>
+  </tbody>
+ </table>
+ <p class="only-28byj">Total: <b>R$ 190 a 300</b>, dependendo da placa.</p>
+ <p class="only-nema17">Total: <b>R$ 180 a 290</b> (o motor você já tem).</p>
+ <p>O firmware também suporta a <b>XIAO ESP32S3 Sense</b> (menor, câmera embutida) e
+ qualquer <b>ESP32-S3 sem câmera</b>.</p>
+</section>
+
+<!-- =================================================== -->
+<section id="imprimir">
+ <div class="kicker">05 — Impressão</div>
+ <h2>Imprimir as peças</h2>
+
+ <div class="warn"><b>Imprima primeiro a peça de teste.</b>
+ <code class="only-28byj">stl/motor_28byj/test_fit.stl</code><code class="only-nema17">stl/motor_nema17/test_fit.stl</code>
+ — 10 minutos, 9 g. Ela tem quatro gabaritos: furos do motor, encaixe do eixo, socket do
+ funil e amostra do funil. Parafuse o motor de verdade nela. Se estiver apertado, mude
+ <code>fit = 0.10</code> em <code>cad/common.scad</code>, rode <code>cad/build.sh</code>
+ e reimprima só a peça de teste. Isso economiza umas 15 horas de retrabalho.</div>
+
+ <h3>Parâmetros (Creality K1 Max, PETG)</h3>
+ <table>
+  <thead><tr><th>Parâmetro</th><th>Valor</th></tr></thead>
+  <tbody>
+   <tr><td>Material</td><td><b>PETG</b> (PLA funciona, mas sofre com umidade e sol)</td></tr>
+   <tr><td>Bico / camada</td><td>0,4 mm / <b>0,2 mm</b></td></tr>
+   <tr><td>Temperaturas</td><td>240–250 °C / mesa 80 °C</td></tr>
+   <tr><td>Velocidade</td><td>60–120 mm/s (não force PETG a 300)</td></tr>
+   <tr><td>Ventilação</td><td>40–60 %</td></tr>
+   <tr><td>Paredes / preenchimento</td><td>3 (4 no tubo) / 20 % (30 % na rosca)</td></tr>
+   <tr><td>Suporte</td><td><b>nenhuma peça precisa</b></td></tr>
+  </tbody>
+ </table>
+
+ <div class="note">Todos os STLs já saem na orientação certa de impressão.
+ <b>Não gire as peças no fatiador</b> — a orientação foi escolhida para eliminar suporte
+ e deixar as camadas na direção dos esforços.</div>
+
+ <h3>Peças</h3>
+ <p>As pastas <code>stl/motor_28byj/</code> e <code>stl/motor_nema17/</code> contêm as
+ quatro peças que dependem do motor. <b>Imprima só a pasta do seu motor.</b></p>
+ <table>
+  <thead><tr><th>Arquivo</th><th>Massa</th><th>Observação</th></tr></thead>
+  <tbody>
+   <tr class="only-28byj"><td><code>motor_28byj/auger.stl</code></td><td>3 g</td><td>a rosca; imprime em pé, cubo na mesa</td></tr>
+   <tr class="only-nema17"><td><code>motor_nema17/auger.stl</code></td><td>4 g</td><td>a rosca; cubo mais longo para engolir o eixo do NEMA</td></tr>
+   <tr class="only-28byj"><td><code>motor_28byj/barrel_a.stl</code></td><td>10 g</td><td>metade do tubo — <b>furos roscados</b> M3</td></tr>
+   <tr class="only-28byj"><td><code>motor_28byj/barrel_b.stl</code></td><td>10 g</td><td>metade do tubo — furos passantes com rebaixo</td></tr>
+   <tr class="only-nema17"><td><code>motor_nema17/barrel_a.stl</code></td><td>13 g</td><td>metade do tubo — <b>furos roscados</b> M3</td></tr>
+   <tr class="only-nema17"><td><code>motor_nema17/barrel_b.stl</code></td><td>13 g</td><td>metade do tubo — furos passantes com rebaixo</td></tr>
+   <tr><td><code>hopper.stl</code></td><td>49 g</td><td>funil ~300 ml, sai translúcido (dá para ver o nível)</td></tr>
+   <tr><td><code>lid.stl</code></td><td>26 g</td><td>tampa do funil</td></tr>
+   <tr><td><code>chute.stl</code></td><td>6 g</td><td>calha de saída</td></tr>
+   <tr><td><code>chute_com_sensor.stl</code></td><td>6 g</td><td>alternativa: com 2 furos de 3,4 mm para o sensor óptico</td></tr>
+   <tr><td><code>bracket.stl</code></td><td>66 g</td><td>braçadeira + mastro + berço; imprime em pé, 38 mm</td></tr>
+   <tr><td><code>saddle_cap.stl</code></td><td>2 g</td><td>tampa do berço</td></tr>
+   <tr><td><code>knob.stl</code></td><td>6 g</td><td>manípulo do aperto</td></tr>
+   <tr><td><code>box_base.stl</code></td><td>31 g</td><td>caixa da eletrônica</td></tr>
+   <tr><td><code>box_lid.stl</code></td><td>14 g</td><td>tampa da caixa</td></tr>
+   <tr><td><code>cam_pod.stl</code></td><td>15 g</td><td>suporte da câmera (já com o giro que desvia do funil)</td></tr>
+  </tbody>
+ </table>
+ <p>Total ≈ <b>240 g</b>. Cabe em duas mesas na K1 Max. Sugestão: mesa 1 =
+ <code>bracket</code> + <code>hopper</code> + <code>lid</code>; mesa 2 = o resto.</p>
+
+ <h3>Detalhes que importam</h3>
+ <p><b>A rosca.</b> A hélice é uma escada helicoidal: cada camada apoia na anterior, então
+ sai sem suporte. Depois de imprimir, passe o dedo e tire a rebarba — rebarba é a causa
+ número 1 de rosca travando no tubo.</p>
+ <p><b>As duas metades do tubo.</b> A metade <b>A</b> tem furos de 2,55 mm (o parafuso M3
+ rosca direto no plástico); a <b>B</b> tem furos passantes de 3,3 mm com rebaixo para a
+ cabeça. Não troque.</p>
+ <p><b>Quer mudar alguma medida?</b> Tudo é paramétrico em OpenSCAD. Edite
+ <code>cad/common.scad</code> e rode <code>cad/build.sh</code> — todos os STLs são
+ regerados.</p>
+</section>
+
+<!-- =================================================== -->
+<section id="eletronica">
+ <div class="kicker">06 — Eletrônica</div>
+ <h2>Ligações</h2>
+
+ <div class="only-28byj">
+ <p>São 6 fios. Não precisa soldar nada se usar jumpers fêmea-fêmea.</p>
+ <table>
+  <thead><tr><th>ULN2003</th><th>ESP32-S3</th><th>Por quê</th></tr></thead>
+  <tbody>
+   <tr><td>IN1</td><td><b>GPIO 1</b></td><td></td></tr>
+   <tr><td>IN2</td><td><b>GPIO 2</b></td><td></td></tr>
+   <tr><td>IN3</td><td><b>GPIO 41</b></td><td></td></tr>
+   <tr><td>IN4</td><td><b>GPIO 42</b></td><td></td></tr>
+   <tr><td>5 V</td><td>+5 V da fonte</td><td>o motor puxa até ~500 mA; não tire do 3V3</td></tr>
+   <tr><td>GND</td><td>GND comum</td><td>fonte, ESP32 e driver no <b>mesmo</b> GND</td></tr>
+  </tbody>
+ </table>
+ <pre><code>      FONTE 5V 2A
+        +5V ──────────┬──────────────┬──────────┐
+        GND ──────┬───┼──────────┬───┼──────────┼──┐
+                  │   │          │   │          │  │
+               ESP32-S3        ULN2003      C1 470-1000uF
+               5V    GND       5V   GND     (+)     (-)
+
+   GPIO 1  ─────►  IN1        ULN2003 ──► motor 28BYJ-48
+   GPIO 2  ─────►  IN2        (conector branco de 5 vias)
+   GPIO 41 ─────►  IN3
+   GPIO 42 ─────►  IN4</code></pre>
+ </div>
+
+ <div class="only-nema17">
+ <p>Com NEMA 17 são 3 sinais de controle + potência de 12 V.</p>
+ <table>
+  <thead><tr><th>Driver (A4988/DRV8825)</th><th>Ligar em</th><th>Observação</th></tr></thead>
+  <tbody>
+   <tr><td>STEP</td><td><b>GPIO 1</b></td><td></td></tr>
+   <tr><td>DIR</td><td><b>GPIO 2</b></td><td></td></tr>
+   <tr><td>ENABLE</td><td><b>GPIO 41</b></td><td>ativo em nível baixo; o firmware desliga o motor quando para</td></tr>
+   <tr><td>VDD (lógica)</td><td>3V3 do ESP32</td><td>A4988 e DRV8825 aceitam lógica de 3,3 V</td></tr>
+   <tr><td>GND (lógica)</td><td>GND comum</td><td></td></tr>
+   <tr><td>VMOT / GND</td><td>+12 V da fonte</td><td><b>100 µF eletrolítico direto nesses pinos</b></td></tr>
+   <tr><td>RESET + SLEEP</td><td>curto entre eles</td><td>senão o driver nunca sai do reset</td></tr>
+   <tr><td>MS1, MS2</td><td>3V3 (A4988)</td><td>1/8 de micropasso — é o que o firmware espera</td></tr>
+   <tr><td>1A 1B 2A 2B</td><td>bobinas do motor</td><td>1A+1B = uma bobina, 2A+2B = a outra</td></tr>
+  </tbody>
+ </table>
+ <div class="warn"><b>Ajuste o limite de corrente antes de ligar o motor.</b> Com o motor
+ desconectado, meça a tensão no trimpot (Vref) e ajuste:
+ <br>A4988 (sense 0,1 Ω): <code>Vref = corrente × 0,8</code> → 0,4 V para 0,5 A
+ <br>DRV8825: <code>Vref = corrente ÷ 2</code> → 0,25 V para 0,5 A
+ <br>0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.</div>
+ <div class="note">Não sabe quais fios são de cada bobina? Meça continuidade com o
+ multímetro: os dois fios que têm continuidade entre si são uma bobina. Se o motor
+ vibrar sem girar, você misturou as bobinas — troque 1B com 2A.</div>
+ <div class="note">Micropasso em outros drivers: <b>DRV8825</b> → M0 e M1 em nível alto,
+ M2 em baixo. <b>TMC2208/2209</b> → MS1 e MS2 em nível baixo (já é 1/8 por padrão) e ele
+ roda quase sem ruído.</div>
+ <pre><code>   FONTE 12V ──┬── VMOT (driver)  ── C 100uF ── GND
+               └── step-down 5V ──► ESP32-S3 (5V)
+
+   ESP32 3V3 ──► VDD driver          RESET ─┐
+   ESP32 GND ──► GND driver (comum)  SLEEP ─┘ (em curto)
+   GPIO 1  ──► STEP      MS1 ──┐
+   GPIO 2  ──► DIR       MS2 ──┴── 3V3   (1/8 de micropasso)
+   GPIO 41 ──► ENABLE
+   1A 1B 2A 2B ──► bobinas do NEMA 17</code></pre>
+ </div>
+
+ <div class="danger"><b>O capacitor não é opcional.</b> O motor dá picos de corrente a
+ cada passo. Sem o eletrolítico junto do driver, o pico derruba a tensão e você vê:
+ câmera falhando ao inicializar, reset aleatório e Wi-Fi caindo na hora de alimentar.
+ Respeite a polaridade — perna comprida é o positivo.</div>
+
+ <h3>Sensor de grãos (opcional, mas vale para viagem)</h3>
+ <p>Confirma que a ração realmente caiu. Sem ele, o alimentador "acha" que alimentou
+ mesmo com a rosca travada ou o funil vazio.</p>
+ <ul>
+  <li>Imprima a calha na variante <code>chute_com_sensor.stl</code>: ela tem dois furos
+  de 3,4 mm alinhados, um de cada lado do duto.</li>
+  <li>Encaixe por pressão um <b>LED IR de 3 mm</b> num furo e um <b>fototransistor de
+  3 mm</b> no outro. Cada grão que passa corta o feixe e gera um pulso.</li>
+  <li>Alimente com <b>3,3 V</b> (a entrada do ESP32 não é 5 V tolerante). Resistor de
+  150 Ω em série no LED e 10 kΩ do coletor para o 3V3.</li>
+  <li>Saída digital → <b>GPIO 21</b>. Ligue em <i>Ajustes → Sensor de grãos</i> e
+  reinicie.</li>
+ </ul>
+ <p>Se o sensor estiver ligado e nada for detectado, o firmware recua a rosca, tenta de
+ novo e — se ainda nada — registra falha no histórico e manda aviso no Telegram.</p>
+
+ <h3>Montagem na caixa</h3>
+ <ul>
+  <li>Pinos para a placa ESP32-S3 e para o driver, para parafuso auto-atarraxante M2,5.</li>
+  <li><b>Fendas de abraçadeira</b> como plano B: se os furos da sua placa não baterem,
+  prenda com abraçadeira de nylon ou fita dupla face e ignore os pinos.</li>
+  <li>Janela do USB-C numa ponta — essa ponta fica para <b>cima</b> na montagem.</li>
+  <li>Dois furos de 7,5 mm na outra ponta para os cabos saírem <b>para baixo</b>.</li>
+ </ul>
+ <div class="note"><b>Confira com paquímetro</b> a distância entre os furos da sua placa
+ e ajuste <code>b1_hx</code> / <code>b1_hy</code> em <code>cad/common.scad</code> antes
+ de imprimir a caixa. O padrão (55 × 20 mm) é para a placa Freenove.</div>
+ <div class="note"><b>Laço de gotejamento:</b> deixe os cabos saírem por baixo da caixa e
+ subirem em curva. Se um dia escorrer água pelo cabo, ela pinga no chão em vez de entrar
+ na caixa.</div>
+</section>
+
+<!-- =================================================== -->
+<section id="montagem">
+ <div class="kicker">07 — Montagem</div>
+ <h2>Montar</h2>
+
+ <figure>
+  <img src="docs/img/explodido.png" alt="Vista explodida das peças">
+  <figcaption>Vista explodida. Os arquivos <code>stl/montagem_completa.stl</code> e
+  <code>stl/montagem_explodida.stl</code> abrem em qualquer visualizador 3D.</figcaption>
+ </figure>
+
+ <h3>Parafusos</h3>
+ <table>
+  <thead><tr><th>Onde</th><th>Parafuso</th><th>Qtd</th></tr></thead>
+  <tbody>
+   <tr><td>Metades do tubo (orelhas)</td><td>M3 × 8</td><td>3</td></tr>
+   <tr class="only-28byj"><td>Motor no prato</td><td>M3 × 10</td><td>2</td></tr>
+   <tr class="only-nema17"><td>Motor no prato (rosca no próprio motor)</td><td>M3 × 10</td><td>4</td></tr>
+   <tr><td>Funil no colar do tubo</td><td>M3 × 10</td><td>2</td></tr>
+   <tr><td>Tampa do berço na braçadeira</td><td>M3 × 16</td><td>2</td></tr>
+   <tr><td>Tampa da caixa</td><td>M3 × 10</td><td>4</td></tr>
+   <tr><td>Caixa no mastro</td><td>M4 × 12</td><td>2</td></tr>
+   <tr><td>Suporte da câmera na caixa</td><td>M3 × 12</td><td>2</td></tr>
+   <tr><td>PCB da câmera no suporte</td><td>M2 × 6</td><td>2</td></tr>
+   <tr><td>Aperto da braçadeira</td><td>M4 × 30 + porca M4</td><td>1</td></tr>
+  </tbody>
+ </table>
+ <p>Tudo que rosca no plástico rosca <b>direto</b>, sem inserto. Entre devagar e não
+ aperte até o fim da força.</p>
+
+ <h3>Passo a passo</h3>
+ <ol>
+  <li><b>Rosca no tubo.</b> Limpe a rebarba da hélice.
+   <span class="only-28byj">Encaixe o eixo achatado do 28BYJ no cubo da rosca — deve
+   entrar com pressão firme dos dedos.</span>
+   <span class="only-nema17">Enfie o eixo do NEMA 17 no cubo da rosca (encaixe justo) e
+   trave com o parafuso M3 radial. Dica: lime um chanfro no eixo, aí não escorrega
+   nunca.</span>
+   Deite a rosca na metade <b>B</b>, com a ponta fina na bolsa do fundo, feche com a
+   metade <b>A</b> e aperte os 3 M3 × 8.</li>
+  <li><b>Teste antes de continuar:</b> gire o eixo com a mão. A rosca tem que girar
+   livre. Se travar, afrouxe, alinhe e aperte de novo — ou lime a hélice.</li>
+  <li><b>Motor.</b>
+   <span class="only-28byj">Parafuse no prato com 2 M3 × 10, com o corpo do motor para
+   baixo. O ressalto do eixo entra no rebaixo do prato — é isso que garante o
+   alinhamento.</span>
+   <span class="only-nema17">Parafuse com 4 M3 × 10 no quadrado de 31 mm. Os parafusos
+   entram por dentro da torre e roscam no próprio motor; use chave allen com ponta
+   esférica. O ressalto de 22 mm do motor entra no rebaixo do prato.</span></li>
+  <li><b>Funil.</b> Encaixe o spigot no socket do tubo e parafuse os 2 M3 × 10 do flange
+   nas orelhas do colar. Esses dois parafusos também prendem as metades do tubo na
+   região do colar. Jogue um sachê de sílica gel dentro antes da ração.</li>
+  <li><b>Calha.</b> Empurre por baixo no boss do tubo até as duas covinhas estalarem. Sai
+   com um puxão firme, para limpeza. A boca inclinada aponta para dentro do aquário.</li>
+  <li><b>Braçadeira.</b> Porca M4 no alojamento sextavado, parafuso M4 × 30, manípulo
+   encaixado na cabeça. Deite o tubo no berço e feche com a tampa + 2 M3 × 16.
+   <span class="only-28byj">Posicione o berço entre <b>x = 11 e 49 mm</b> do tubo (entre a
+   orelha da frente e a calha).</span>
+   <span class="only-nema17">Com NEMA 17 o tubo é 13 mm mais longo: posicione o berço
+   entre <b>x = 24 e 62 mm</b>.</span></li>
+  <li><b>Eletrônica e câmera.</b> Placas na caixa, caixa no mastro (USB para cima), PCB da
+   câmera no <code>cam_pod</code> com 2 M2 × 6. Cabo flat da câmera com cuidado: levante
+   a aba escura, insira, abaixe a aba.</li>
+ </ol>
+
+ <div class="note">Confira: a saída da calha tem que ficar <b>2 a 5 cm acima da linha
+ d'água</b>. Se no seu aquário a água está muito alta ou baixa, ajuste
+ <code>mast_h</code> em <code>cad/bracket.scad</code> e reimprima só a braçadeira.</div>
+ <div class="note"><b>Aquário com tampa?</b> Fica mais firme apoiar o conjunto na tampa e
+ fazer um furo de ~25 mm para a calha passar. Aí você não precisa da braçadeira nem da
+ tampa do berço.</div>
+
+ <h3>A mira da câmera</h3>
+ <p>O suporte tem <b>duas</b> inclinações: 45° para baixo e 45° de giro na horizontal. O
+ giro existe porque, olhando reto, a câmera ficaria de cara com a parede do funil.</p>
+ <figure>
+  <img src="docs/img/vista_da_camera.png" alt="Simulação do que a câmera enquadra">
+  <figcaption>Simulação do enquadramento: saída da calha e superfície da água. Na câmera
+  real, com lente bem mais aberta, você vê muito mais do aquário.</figcaption>
+ </figure>
+ <p>Imagem de cabeça para baixo ou espelhada? Corrija em <i>Ajustes → Câmera</i>, sem
+ reimprimir nada. Quer outro ângulo? <code>cam_tilt</code> / <code>cam_yaw</code> em
+ <code>cad/cam_pod.scad</code>. O pod é simétrico: montado virado 180°, olha para o outro
+ lado do aquário.</p>
+</section>
+
+<!-- =================================================== -->
+<section id="firmware">
+ <div class="kicker">08 — Firmware</div>
+ <h2>Gravar e configurar</h2>
+
+ <h3>Com PlatformIO (recomendado)</h3>
+ <p>Instale o <a href="https://code.visualstudio.com">VS Code</a> + extensão
+ <b>PlatformIO IDE</b>, abra a pasta <code>firmware/</code> e clique em Upload. Ou por
+ linha de comando:</p>
+ <pre><code><span class="tok-c"># instalar</span>
+pip install --user platformio
+
+<span class="tok-c"># gravar</span>
+cd firmware
+<span class="only-28byj">pio run -e freenove_s3_cam -t upload</span><span class="only-nema17">pio run -e freenove_s3_cam_nema17 -t upload</span>
+pio device monitor</code></pre>
+
+ <table>
+  <thead><tr><th>Ambiente</th><th>Placa / motor</th></tr></thead>
+  <tbody>
+   <tr><td><code>freenove_s3_cam</code></td><td>Freenove ESP32-S3-WROOM CAM + 28BYJ-48</td></tr>
+   <tr><td><code>freenove_s3_cam_nema17</code></td><td>a mesma placa + NEMA 17 (STEP/DIR)</td></tr>
+   <tr><td><code>xiao_s3_sense</code></td><td>Seeed XIAO ESP32S3 Sense + 28BYJ-48</td></tr>
+   <tr><td><code>xiao_s3_sense_nema17</code></td><td>XIAO + NEMA 17</td></tr>
+   <tr><td><code>s3_sem_camera</code></td><td>ESP32-S3 genérico, sem câmera</td></tr>
+  </tbody>
+ </table>
+
+ <h3>Sem instalar nada (binário pronto)</h3>
+ <p>A pasta <code>firmware/bin/</code> tem os binários já compilados:</p>
+ <pre><code>pip install esptool
+cd firmware/bin/freenove_s3_cam
+esptool.py --chip esp32s3 --port COM5 --baud 921600 write_flash -z \
+  0x0 bootloader.bin 0x8000 partitions.bin 0xe000 boot_app0.bin 0x10000 firmware.bin</code></pre>
+ <div class="note"><b>Placa Freenove:</b> grave pela porta <b>UART</b> (a que tem o chip
+ USB-serial), não pela USB nativa — é onde o log serial também aparece. Se a gravação
+ falhar: segure BOOT, toque RESET, solte BOOT e tente de novo.</div>
+
+ <h3>Primeiro boot</h3>
+ <ol>
+  <li>Não há Wi-Fi salvo, então o aparelho sobe em <b>modo configuração</b>: procure a
+  rede <code>AquaFeeder-XXXX</code>, senha <code>aquafeeder</code>.</li>
+  <li>Abra <b>http://192.168.4.1</b>.</li>
+  <li><i>Ajustes → Rede e sistema</i>: preencha o seu Wi-Fi, <b>defina uma senha para a
+  interface</b> e salve. O aparelho reinicia e entra na sua rede.</li>
+  <li>Depois disso acesse por <b>http://aquafeeder.local</b> (ou pelo IP que aparece no
+  monitor serial).</li>
+ </ol>
+ <p>Vale <b>reservar o IP</b> no roteador (DHCP estático) — assim o endereço nunca muda.</p>
+
+ <h3>Atualizar depois (OTA)</h3>
+ <pre><code>pio run -e freenove_s3_cam -t upload --upload-port aquafeeder.local</code></pre>
+ <p>A senha do OTA é a mesma senha da interface.</p>
+
+ <h3>Como a agenda decide alimentar</h3>
+ <p>A cada 15 s o firmware avalia cada horário ativo. Dispara se: <b>já passou da
+ hora</b> E <b>a última alimentação foi antes dessa hora</b> E <b>não passou da janela de
+ recuperação</b>. Consequências práticas, todas desejáveis:</p>
+ <table>
+  <thead><tr><th>Situação</th><th>Resultado</th></tr></thead>
+  <tbody>
+   <tr><td>Faltou luz às 08:00, voltou 08:40</td><td>alimenta ao ligar (dentro da janela de 90 min)</td></tr>
+   <tr><td>Faltou luz às 08:00, voltou 14:00</td><td>não alimenta — ficou fora da janela</td></tr>
+   <tr><td>Você alimentou na mão às 07:50</td><td>o horário das 08:00 é pulado</td></tr>
+   <tr><td>Reset no meio do dia</td><td>não repete refeições já feitas</td></tr>
+  </tbody>
+ </table>
+ <p>O contador do dia e a hora da última refeição ficam na memória permanente (NVS),
+ então sobrevivem à falta de energia.</p>
+</section>
+
+<!-- =================================================== -->
+<section id="calibrar">
+ <div class="kicker">09 — Calibração</div>
+ <h2>Acertar a dose</h2>
+ <p class="lead">O firmware não sabe o que é "uma porção" para o <i>seu</i> peixe. Isso se
+ resolve em 10 minutos e é o passo que mais influencia o resultado final.</p>
+
+ <p>Regra prática: a quantidade que os peixes limpam em <b>2 a 3 minutos</b>, sem sobrar
+ nada no fundo. Para a maioria dos aquários domésticos (10 a 60 L, peixes pequenos) isso
+ dá entre <b>0,2 e 0,6 ml por refeição</b> — bem menos do que a intuição sugere.</p>
+
+ <div class="card">
+  <h3 style="margin-top:0">Calculadora de dose</h3>
+  <div class="calc">
+   <div>
+    <label>Passos por porção</label>
+    <input id="cSteps" type="number" value="1024" min="40" max="20000">
+   </div>
+   <div>
+    <label>Porções por acionamento</label>
+    <input id="cPort" type="number" value="1" min="1" max="20">
+   </div>
+   <div>
+    <label>Volume por volta (ml)</label>
+    <input id="cVol" type="number" value="0.93" step="0.01">
+   </div>
+   <div>
+    <label>Resultado</label>
+    <div class="out" id="cOut">0,23 ml</div>
+    <div class="dim" id="cFrac" style="font-size:12px;color:var(--dim)">1/4 de volta</div>
+   </div>
+  </div>
+ </div>
+
+ <table>
+  <thead><tr><th>Objetivo</th><th class="only-28byj">Passos (28BYJ)</th><th class="only-nema17">Passos (NEMA 1/8)</th><th>Dose aprox.</th></tr></thead>
+  <tbody>
+   <tr><td>bem pouco</td><td class="only-28byj">512</td><td class="only-nema17">200</td><td>~0,12 ml</td></tr>
+   <tr><td><b>padrão</b></td><td class="only-28byj"><b>1024</b></td><td class="only-nema17"><b>400</b></td><td><b>~0,23 ml</b></td></tr>
+   <tr><td>médio</td><td class="only-28byj">2048</td><td class="only-nema17">800</td><td>~0,46 ml</td></tr>
+   <tr><td>bastante</td><td class="only-28byj">4096</td><td class="only-nema17">1600</td><td>~0,93 ml</td></tr>
+  </tbody>
+ </table>
+
+ <h3>Procedimento</h3>
+ <ol>
+  <li>Ponha ração no funil (pelo menos 1/3, para o peso ajudar a descer).</li>
+  <li>Encha a rosca: <i>Agora → Manutenção → Avançar</i> umas 3 vezes. Recolha essa
+  ração num potinho, não jogue no aquário.</li>
+  <li>Ponha um papel embaixo da calha, clique em <b>1 porção</b> e veja quanto caiu.</li>
+  <li>Ajuste <i>Ajustes → Dosagem → Passos por porção</i>.</li>
+  <li>Repita 5 vezes e veja se a dose é <b>repetível</b>. Variação de ±20 % é normal com
+  granulado; mais que isso indica ração grande demais ou hélice com rebarba.</li>
+ </ol>
+
+ <h3>Depois de calibrar, ajuste as travas</h3>
+ <ul>
+  <li><b>Máx. porções/dia</b> — o total real que você usa + 2 de margem. É o que impede
+  que uma falha ou um comando repetido entupam o aquário de comida.</li>
+  <li><b>Máx. por vez</b> — 2 ou 3 basta.</li>
+  <li><b>Intervalo mínimo</b> — 45 s evita clique duplo acidental.</li>
+  <li><b>Janela de recuperação</b> — 90 min. Melhor um jejum que uma dose fora de hora.</li>
+ </ul>
+
+ <div class="warn"><b>Umidade é o inimigo de verdade.</b> Ração absorvendo umidade
+ empedra e trava a rosca — é o motivo número 1 de alimentador automático falhar em
+ viagem. Sachê de sílica gel no funil, tampa sempre fechada, e não encha até a boca:
+ ração velha no fundo é a que empedra.</div>
+</section>
+
+<!-- =================================================== -->
+<section id="remoto">
+ <div class="kicker">10 — Acesso remoto</div>
+ <h2>Usar de fora de casa</h2>
+ <p>A interface web só existe dentro da sua rede. Para acionar de outro lugar, três
+ caminhos em ordem de recomendação:</p>
+
+ <h3>1. Telegram (mais simples e mais seguro)</h3>
+ <p>Não precisa abrir nada no roteador: é o alimentador que sai para conversar com o
+ Telegram.</p>
+ <ol>
+  <li>No Telegram, fale com <b>@BotFather</b> → <code>/newbot</code>.</li>
+  <li>Ele devolve um token. <b>Esse token é a chave da sua casa</b> — não compartilhe.</li>
+  <li>Cole em <i>Ajustes → Telegram → Token do bot</i> e salve.</li>
+  <li>Mande qualquer mensagem para o seu bot. Ele responde com o seu <b>chat id</b>.</li>
+  <li>Cole esse número em <i>Chat ID autorizado</i> e salve.</li>
+ </ol>
+ <p>Só esse chat consegue dar comandos; qualquer outra pessoa que encontre o bot é
+ ignorada.</p>
+ <table>
+  <thead><tr><th>Comando</th><th>O que faz</th></tr></thead>
+  <tbody>
+   <tr><td><code>/alimentar</code></td><td>1 porção</td></tr>
+   <tr><td><code>/alimentar 2</code></td><td>2 porções</td></tr>
+   <tr><td><code>/foto</code></td><td>tira e envia uma foto do aquário</td></tr>
+   <tr><td><code>/status</code></td><td>porções do dia, última refeição, sinal do Wi-Fi</td></tr>
+   <tr><td><code>/agenda</code></td><td>lista os horários programados</td></tr>
+  </tbody>
+ </table>
+ <p>Com <i>Avisar a cada alimentação</i> ligado você recebe mensagem a cada refeição —
+ inclusive as da agenda — e alerta se o sensor de grãos não detectar ração.</p>
+ <div class="note"><b>Sobre segurança:</b> a conexão é HTTPS, mas o firmware não valida o
+ certificado (<code>setInsecure()</code>) para economizar memória — é o que praticamente
+ toda biblioteca de bot para ESP32 faz. Risco real baixo, mas está dito.</div>
+
+ <h3>2. VPN / Tailscale</h3>
+ <p>Se quer o vídeo ao vivo e a interface inteira de fora, instale <b>Tailscale</b> ou
+ WireGuard num computador que fique ligado em casa. Muitos roteadores modernos já trazem
+ servidor VPN embutido.</p>
+
+ <h3>3. Porta aberta no roteador — não faça</h3>
+ <p>Encaminhar a porta 80 para a internet expõe um dispositivo caseiro a varredura
+ constante. Se ainda assim quiser: senha forte na interface, porta externa alta e
+ aleatória, nunca exponha a porta 81 (vídeo) e prefira um proxy reverso com HTTPS.</p>
+
+ <div class="card">
+  <b>Integrar com outras coisas</b><br>
+  A <a href="api.html">API HTTP</a> é aberta dentro da rede: n8n, Home Assistant, cron,
+  script. Um detalhe útil: <code>/api/status</code> devolve <code>fedToday</code>, então
+  você pode montar um alerta externo do tipo "se às 21h ainda não alimentou hoje, me
+  avise".
+ </div>
+</section>
+
+<!-- =================================================== -->
+<section id="viagem">
+ <div class="kicker">11 — Viagem</div>
+ <h2>Checklist antes de viajar</h2>
+ <p class="lead">Alimentador automático é o tipo de coisa que só falha quando você não
+ está lá. Este checklist existe para isso. Ele fica salvo no seu navegador.</p>
+
+ <h3>Duas semanas antes</h3>
+ <ul class="chk" data-chk="a">
+  <li><input type="checkbox" id="a1"><label for="a1">Deixar rodando de verdade por 7 dias, com você em casa. É o único teste que vale.</label></li>
+  <li><input type="checkbox" id="a2"><label for="a2">Conferir no Histórico se todos os horários dispararam.</label></li>
+  <li><input type="checkbox" id="a3"><label for="a3">Ver se sobra ração no fundo. Se sobra, diminuir os passos por porção.</label></li>
+  <li><input type="checkbox" id="a4"><label for="a4">Motor está só morno? Quente significa passo rápido demais — aumentar os µs por passo.</label></li>
+ </ul>
+
+ <h3>Uma semana antes</h3>
+ <ul class="chk" data-chk="b">
+  <li><input type="checkbox" id="b1"><label for="b1">Trocar a ração do funil por ração nova e seca.</label></li>
+  <li><input type="checkbox" id="b2"><label for="b2">Sachê de sílica gel novo.</label></li>
+  <li><input type="checkbox" id="b3"><label for="b3">Desmontar a calha e limpar (é só puxar).</label></li>
+  <li><input type="checkbox" id="b4"><label for="b4">Confirmar o Máx. porções/dia — deixar justo, não generoso.</label></li>
+  <li><input type="checkbox" id="b5"><label for="b5">Teste de queda de energia: desligar a fonte no meio de um horário e ligar 10 min depois. Tem que alimentar ao voltar.</label></li>
+ </ul>
+
+ <h3>Um dia antes</h3>
+ <ul class="chk" data-chk="c">
+  <li><input type="checkbox" id="c1"><label for="c1">Bot respondendo <code>/status</code> e <code>/foto</code> pelo <b>4G do celular</b>, não pelo Wi-Fi de casa.</label></li>
+  <li><input type="checkbox" id="c2"><label for="c2">IP reservado no roteador (DHCP estático).</label></li>
+  <li><input type="checkbox" id="c3"><label for="c3">IP e senha da interface anotados em algum lugar acessível na viagem.</label></li>
+  <li><input type="checkbox" id="c4"><label for="c4">Câmera enquadrando a superfície da água e a saída da calha.</label></li>
+  <li><input type="checkbox" id="c5"><label for="c5">Funil com o necessário para o período + 1 semana.</label></li>
+ </ul>
+
+ <h3>Plano B (importante)</h3>
+ <p>Nenhum equipamento caseiro é 100 % confiável. Combine com uma segunda camada:</p>
+ <ol>
+  <li><b>Uma pessoa de confiança com a chave</b> — e avise que existe um alimentador
+  automático, para ela não alimentar em dobro. Deixe ração porcionada em saquinhos, um
+  por dia, para usar <b>só se você pedir</b>.</li>
+  <li><b>Jejum é seguro.</b> Se a viagem é de até uma semana, o risco de morrer de fome é
+  muito menor que o de morrer por excesso de comida ou pico de amônia.</li>
+  <li>Viagem longa (mais de 3 semanas)? A manutenção da água é um problema maior que a
+  comida — troca parcial é insubstituível.</li>
+ </ol>
+</section>
+
+<!-- =================================================== -->
+<section id="problemas">
+ <div class="kicker">12 — Diagnóstico</div>
+ <h2>Quando dá problema</h2>
+
+ <details><summary>A rosca trava ou range</summary><div class="in">
+  Rebarba na hélice (lime), parafusos das metades apertados demais (desaperte e alinhe
+  pelo giro livre), ou grão maior que a folga. Teste sem ração: se gira livre vazia e
+  trava cheia, é a ração.
+ </div></details>
+
+ <details><summary>Sai muito mais ração que o programado</summary><div class="in">
+  Ração fluindo por gravidade. O tubo é horizontal justamente para evitar isso — confira
+  se a braçadeira não deixou o conjunto inclinado para frente. Pode também reduzir a
+  folga: <code>radial_clear = 0.3</code> em <code>common.scad</code>.
+ </div></details>
+
+ <details><summary>Sai pouco ou nada, mas o motor gira</summary><div class="in">
+  Ração empedrada fazendo "ponte" na boca do funil. Bata de leve no funil: se descer, é
+  isso. Troque a ração, ponha sílica e aumente <code>ANTIJAM_STEPS</code> em
+  <code>firmware/include/config.h</code>.
+ </div></details>
+
+ <details><summary>Motor esquenta</summary><div class="in">
+  Morno é normal. Quente: aumente os µs por passo e confira a fonte — 5 V caindo para
+  4,2 V faz o motor perder torque e esquentar. As bobinas são desligadas quando o motor
+  para; se esquentar <i>parado</i>, tem pino travado em nível alto (revise a fiação).
+  <span class="only-nema17">No NEMA 17, verifique também o limite de corrente do driver:
+  acima de 0,8 A é desperdício e calor.</span>
+ </div></details>
+
+ <details><summary>Motor vibra mas não gira</summary><div class="in">
+  <span class="only-28byj">Fios do motor na ordem errada no ULN2003, ou IN3 e IN4
+  trocados.</span>
+  <span class="only-nema17">Bobinas misturadas: 1A/1B têm que ser a <i>mesma</i> bobina.
+  Meça continuidade e troque 1B com 2A.</span>
+  Teste com <i>Manutenção → Avançar</i>.
+ </div></details>
+
+ <details><summary>Resets aleatórios ao alimentar</summary><div class="in">
+  Falta o capacitor eletrolítico junto do driver, fonte fraca, ou fio fino demais. É o
+  problema mais comum do projeto.
+ </div></details>
+
+ <details><summary>A câmera não inicializa (esp_camera_init 0x105)</summary><div class="in">
+  Cabo flat mal encaixado ou invertido, ou pinagem errada para a sua placa. Confira
+  <code>firmware/include/camera_pins.h</code> contra o exemplo oficial do fabricante da
+  <b>sua</b> placa. Sem PSRAM a câmera cai para 640×480 automaticamente.
+ </div></details>
+
+ <details><summary>Não acho o aquafeeder.local</summary><div class="in">
+  mDNS não funciona em algumas redes e em Android antigo. Use o IP direto (aparece no
+  monitor serial ou na lista de dispositivos do roteador) e reserve o IP no DHCP.
+ </div></details>
+
+ <details><summary>Vídeo travando / interface lenta com o vídeo ligado</summary><div class="in">
+  Normal: o stream MJPEG consome quase toda a banda do Wi-Fi do ESP32. Use <i>Foto</i> no
+  dia a dia. O stream roda na porta 81 justamente para não travar a API.
+ </div></details>
+
+ <details><summary>Alimentou na hora errada</summary><div class="in">
+  Fuso horário. Em Ajustes, <i>Fuso (TZ POSIX)</i> tem que ser <code>&lt;-03&gt;3</code>
+  para o Brasil. Se o relógio mostra "sem hora", o NTP não sincronizou.
+ </div></details>
+
+ <details><summary>Esqueci a senha da interface</summary><div class="in">
+  Apague a NVS e regrave:
+  <pre><code>pio run -e freenove_s3_cam -t erase && pio run -e freenove_s3_cam -t upload</code></pre>
+  Isso apaga toda a configuração (Wi-Fi, agenda, contadores).
+ </div></details>
+
+ <details><summary>Log serial — o que procurar</summary><div class="in">
+  <pre><code>[cfg] carregado (412 bytes)
+[feeder] pronto (28BYJ-48/ULN2003). 1024 passos/porcao, 1300 us/passo, hoje=2
+[cam] ok (psram=1, tam=2, q=12)
+[wifi] ok  ip=192.168.0.42  rssi=-58 dBm
+[web] http://aquafeeder.local (porta 80)
+[tg] pronto, offset inicial 123456789
+[agenda] slot 0 disparado (08:00)
+[feeder] 2 porcao(oes) via agenda, graos=14, ok=1</code></pre>
+ </div></details>
+</section>
+
+</main>
+</div>
+
+<footer>
+ AquaFeeder ESP32-S3 · projeto aberto ·
+ <a href="https://github.com/Gilson-Android/alimentador">código, STLs e CAD no GitHub</a><br>
+ Peças em OpenSCAD paramétrico · firmware em C++/Arduino · sem dependência de nuvem
+</footer>
+
+<div id="lb"><img alt=""></div>
+
+<script>
+// ---------- seletor de motor ----------
+const motor = localStorage.getItem('af_motor') || '28BYJ';
+document.body.dataset.motor = motor;
+document.querySelectorAll('.seg button').forEach(b=>{
+  b.classList.toggle('on', b.dataset.m===motor);
+  b.onclick=()=>{
+    document.body.dataset.motor=b.dataset.m;
+    localStorage.setItem('af_motor',b.dataset.m);
+    document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));
+    calc();
+  };
+});
+
+// ---------- nav ativa ----------
+const links=[...document.querySelectorAll('aside a[href^="#"]')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const spy=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.toggle('on', l.getAttribute('href')==='#'+e.target.id));
+    }
+  });
+},{rootMargin:'-72px 0px -70% 0px'});
+secs.forEach(s=>spy.observe(s));
+document.getElementById('burger').onclick=()=>document.getElementById('side').classList.toggle('open');
+document.querySelectorAll('aside a').forEach(a=>a.onclick=()=>document.getElementById('side').classList.remove('open'));
+
+// ---------- copiar codigo ----------
+document.querySelectorAll('pre').forEach(pre=>{
+  const b=document.createElement('button');
+  b.className='cp'; b.textContent='copiar';
+  b.onclick=()=>{
+    navigator.clipboard.writeText(pre.querySelector('code').innerText.trim());
+    b.textContent='copiado!'; setTimeout(()=>b.textContent='copiar',1600);
+  };
+  pre.appendChild(b);
+});
+
+// ---------- lightbox ----------
+const lb=document.getElementById('lb');
+document.querySelectorAll('figure img, .hero img').forEach(img=>{
+  img.onclick=()=>{lb.querySelector('img').src=img.src; lb.classList.add('on');};
+});
+lb.onclick=()=>lb.classList.remove('on');
+addEventListener('keydown',e=>{if(e.key==='Escape')lb.classList.remove('on')});
+
+// ---------- calculadora ----------
+function calc(){
+  const spr = document.body.dataset.motor==='NEMA17' ? 1600 : 4096;
+  const st=+document.getElementById('cSteps').value||0;
+  const p =+document.getElementById('cPort').value||1;
+  const v =+document.getElementById('cVol').value||0.93;
+  const ml=(st/spr)*v*p;
+  document.getElementById('cOut').textContent=ml.toFixed(2).replace('.',',')+' ml';
+  const turns=(st/spr)*p;
+  document.getElementById('cFrac').textContent=
+    turns.toFixed(2).replace('.',',')+' volta(s) · '+spr+' passos/volta';
+}
+['cSteps','cPort','cVol'].forEach(id=>document.getElementById(id).oninput=calc);
+// ajusta o padrao ao trocar de motor
+if(motor==='NEMA17') document.getElementById('cSteps').value=400;
+calc();
+
+// ---------- checklist persistente ----------
+document.querySelectorAll('.chk input').forEach(c=>{
+  const k='af_chk_'+c.id;
+  c.checked=localStorage.getItem(k)==='1';
+  c.onchange=()=>localStorage.setItem(k,c.checked?'1':'0');
+});
+</script>
+</body>
+</html>

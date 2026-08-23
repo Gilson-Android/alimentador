@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>API HTTP — AquaFeeder ESP32-S3</title>
+<meta name="description" content="Referência completa da API HTTP do AquaFeeder: alimentar, agenda, status, histórico, foto e stream. Exemplos em curl, Python, n8n e Home Assistant.">
+<style>
+:root{
+  --bg:#0d1117; --card:#161d26; --line:#232c38; --line2:#2f3a48;
+  --fg:#e6edf3; --dim:#8b98a5; --dim2:#6b7885;
+  --acc:#3ddc97; --acc2:#4c9aff; --warn:#ffb454; --err:#ff6b6b;
+  --mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.88em;background:#1c2530;padding:.12em .4em;
+  border-radius:5px;color:#a9e6c8;border:1px solid var(--line)}
+h1,h2,h3{line-height:1.25;margin:0}
+header{position:sticky;top:0;z-index:40;background:rgba(13,17,23,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{max-width:1180px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700}
+.logo b{color:var(--acc)}
+.fish{width:24px;height:24px}
+.top nav{margin-left:auto;display:flex;gap:6px}
+.top nav a{color:var(--dim);font-size:13.5px;padding:6px 10px;border-radius:7px}
+.top nav a:hover{color:var(--fg);background:var(--card);text-decoration:none}
+.gh{border:1px solid var(--line2)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;display:grid;
+  grid-template-columns:212px 1fr;gap:36px;align-items:start}
+aside{position:sticky;top:70px;padding:26px 0;max-height:calc(100vh - 70px);overflow-y:auto}
+aside a{display:block;padding:5px 10px;font-size:13px;color:var(--dim);
+  border-left:2px solid var(--line);font-family:var(--mono)}
+aside a:hover{color:var(--fg);background:var(--card);text-decoration:none}
+aside a.on{color:var(--acc);border-left-color:var(--acc);background:#12211b}
+aside .grp{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim2);
+  margin:16px 0 6px;padding-left:10px;font-family:inherit}
+main{padding:26px 0 90px;min-width:0}
+h1{font-size:clamp(25px,4vw,36px);letter-spacing:-.8px}
+.lead{color:var(--dim);font-size:17px;max-width:66ch;margin:12px 0 0}
+section{padding:34px 0 6px;border-top:1px solid var(--line);margin-top:28px}
+section h2{font-size:22px;margin-bottom:12px}
+p{margin:0 0 13px}ul,ol{margin:0 0 13px;padding-left:22px}li{margin:5px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:18px 20px;margin:16px 0}
+.note{border-left:3px solid var(--acc2);background:#101a26;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:15px 0;font-size:15px}
+.warn{border-left:3px solid var(--warn);background:#1e1809;border-radius:0 10px 10px 0;
+  padding:13px 17px;margin:15px 0;font-size:15px}
+table{width:100%;border-collapse:collapse;margin:13px 0;font-size:14.5px;display:block;
+  overflow-x:auto}
+th,td{padding:9px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+tbody tr:hover{background:#141b24}
+pre{background:#0b0f14;border:1px solid var(--line);border-radius:11px;padding:15px 16px;
+  overflow-x:auto;margin:13px 0;position:relative}
+pre code{background:none;border:0;padding:0;color:#c8d6e2;font-size:13.2px;line-height:1.6}
+.cp{position:absolute;top:8px;right:8px;background:#1c2530;border:1px solid var(--line2);
+  color:var(--dim);border-radius:7px;font-size:11px;padding:4px 9px;cursor:pointer;
+  font-family:inherit}
+.cp:hover{color:var(--fg);border-color:var(--acc)}
+.ep{border:1px solid var(--line);border-radius:13px;margin:18px 0;overflow:hidden;
+  background:var(--card)}
+.ep-h{display:flex;align-items:center;gap:11px;padding:13px 17px;background:#131a23;
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ep-h code{font-size:14.5px;background:none;border:0;color:var(--fg);padding:0}
+.ep-b{padding:15px 17px}
+.m{font-family:var(--mono);font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:6px;
+  letter-spacing:.05em}
+.m.get{color:#0d2b1e;background:var(--acc)}
+.m.post{color:#2a1e05;background:var(--warn)}
+.auth{margin-left:auto;font-size:11px;color:var(--dim);border:1px solid var(--line2);
+  padding:2px 8px;border-radius:99px}
+.calc label{font-size:12px;color:var(--dim);display:block;margin-bottom:4px}
+.calc input,.calc select{width:100%;background:#0b0f14;border:1px solid var(--line2);
+  color:var(--fg);border-radius:8px;padding:9px;font-family:var(--mono);font-size:14px}
+.row3{display:grid;grid-template-columns:2fr 1fr 1.2fr;gap:12px}
+footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2);
+  font-size:13.5px;text-align:center}
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;gap:0}
+  aside{display:none}
+  .row3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="top">
+  <div class="logo">
+   <svg class="fish" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="1.7">
+    <path d="M2 12c3-4 7-6 11-6 4 0 6 2 8 6-2 4-4 6-8 6-4 0-8-2-11-6z"/>
+    <circle cx="16.5" cy="10.5" r="1" fill="#3ddc97" stroke="none"/>
+    <path d="M2 12l3-3M2 12l3 3"/>
+   </svg>
+   Aqua<b>Feeder</b> · API
+  </div>
+  <nav>
+   <a href="index.html">Guia de montagem</a>
+   <a class="gh" href="https://github.com/Gilson-Android/alimentador">GitHub</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap">
+<aside id="side">
+ <div class="grp">Começando</div>
+ <a href="#base">Endereço base</a>
+ <a href="#auth">Autenticação</a>
+ <a href="#gerador">Gerador de comandos</a>
+ <div class="grp">Endpoints</div>
+ <a href="#login">POST /api/login</a>
+ <a href="#status">GET /api/status</a>
+ <a href="#feed">POST /api/feed</a>
+ <a href="#jog">POST /api/jog</a>
+ <a href="#config-get">GET /api/config</a>
+ <a href="#config-post">POST /api/config</a>
+ <a href="#log">GET /api/log</a>
+ <a href="#reboot">POST /api/reboot</a>
+ <a href="#snapshot">GET /snapshot.jpg</a>
+ <a href="#stream">GET :81/stream</a>
+ <div class="grp">Referência</div>
+ <a href="#erros">Erros</a>
+ <a href="#slots">Formato da agenda</a>
+ <a href="#exemplos">Integrações</a>
+ <a href="#cors">CORS e navegador</a>
+</aside>
+
+<main>
+<h1>API HTTP do AquaFeeder</h1>
+<p class="lead">Tudo que a interface web faz está exposto como API. Serve para automatizar
+com n8n, Home Assistant, cron, script ou qualquer coisa que fale HTTP. Sem nuvem, sem
+conta, sem intermediário — a comunicação é direta com o aparelho na sua rede.</p>
+
+<section id="base">
+ <h2>Endereço base</h2>
+ <table>
+  <thead><tr><th>Serviço</th><th>Porta</th><th>Exemplo</th></tr></thead>
+  <tbody>
+   <tr><td>Interface + API</td><td>80</td><td><code>http://aquafeeder.local</code></td></tr>
+   <tr><td>Vídeo MJPEG</td><td>81</td><td><code>http://aquafeeder.local:81/stream</code></td></tr>
+  </tbody>
+ </table>
+ <p>O nome <code>aquafeeder</code> é configurável em <i>Ajustes → Nome na rede</i>. Se o
+ mDNS (<code>.local</code>) não funcionar na sua rede, use o IP direto — e reserve o IP no
+ roteador para ele nunca mudar.</p>
+ <p>Todas as respostas JSON usam <code>Content-Type: application/json; charset=utf-8</code>
+ e <code>Cache-Control: no-store</code>.</p>
+</section>
+
+<section id="auth">
+ <h2>Autenticação</h2>
+ <p>Sessão por <b>cookie</b>. Faça <code>POST /api/login</code> com a senha da interface;
+ a resposta traz um <code>Set-Cookie: af=&lt;token&gt;</code> válido por 30 dias. Mande
+ esse cookie nas chamadas seguintes.</p>
+ <ul>
+  <li>O aparelho guarda até <b>4 sessões</b> simultâneas (celular, PC, script...).</li>
+  <li>As sessões vivem em memória: <b>reiniciar o aparelho invalida todas</b>.</li>
+  <li>Se a senha da interface estiver <b>vazia</b>, a API responde sem autenticação
+  nenhuma. Cômodo para testar, ruim para deixar assim.</li>
+ </ul>
+ <div class="warn"><b>Não exponha isso na internet.</b> É HTTP puro, sem TLS: a senha vai
+ em texto claro pela rede local. Para acesso externo use VPN/Tailscale ou o bot do
+ Telegram.</div>
+</section>
+
+<section id="gerador">
+ <h2>Gerador de comandos</h2>
+ <div class="card">
+  <div class="row3">
+   <div>
+    <label>Endereço do alimentador</label>
+    <input id="gHost" value="aquafeeder.local">
+   </div>
+   <div>
+    <label>Senha da interface</label>
+    <input id="gPass" value="minhasenha">
+   </div>
+   <div>
+    <label>Ação</label>
+    <select id="gAct">
+     <option value="login">login (gera o cookie)</option>
+     <option value="status">status</option>
+     <option value="feed1">alimentar 1 porção</option>
+     <option value="feed2">alimentar 2 porções</option>
+     <option value="jogf">girar rosca para frente</option>
+     <option value="jogr">recuar rosca (desentupir)</option>
+     <option value="log">histórico</option>
+     <option value="config">ler configuração</option>
+     <option value="slots">gravar agenda 08:00 e 18:00</option>
+     <option value="photo">baixar foto</option>
+     <option value="reboot">reiniciar</option>
+    </select>
+   </div>
+  </div>
+  <pre style="margin-bottom:0"><code id="gOut"></code></pre>
+ </div>
+ <p>O <code>-c ck.txt</code> grava o cookie num arquivo e o <code>-b ck.txt</code> o
+ reenvia. Rode o login uma vez e depois use o resto quantas vezes quiser.</p>
+</section>
+
+<!-- ======================= ENDPOINTS ======================= -->
+<section id="login">
+ <h2>Endpoints</h2>
+
+ <div class="ep">
+  <div class="ep-h"><span class="m post">POST</span><code>/api/login</code>
+   <span class="auth">público</span></div>
+  <div class="ep-b">
+   <p>Cria a sessão. Corpo JSON com a senha da interface.</p>
+   <pre><code>curl -c ck.txt -X POST http://aquafeeder.local/api/login \
+     -d '{"pass":"minhasenha"}'</code></pre>
+   <p><b>200</b> <code>{"ok":true}</code> + header <code>Set-Cookie: af=...</code><br>
+      <b>401</b> <code>{"err":"senha incorreta"}</code></p>
+  </div>
+ </div>
+</section>
+
+<section id="status">
+ <div class="ep">
+  <div class="ep-h"><span class="m get">GET</span><code>/api/status</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Estado geral. É o endpoint para monitoramento externo.</p>
+   <pre><code>{
+  "wifi": true,          <span class="tok-c">// conectado como estação</span>
+  "ip": "192.168.0.42",
+  "rssi": -58,           <span class="tok-c">// dBm; abaixo de -75 é sinal ruim</span>
+  "ap": false,           <span class="tok-c">// true = está em modo configuração</span>
+  "time": "14:35",       <span class="tok-c">// "sem hora" se o NTP não sincronizou</span>
+  "lastFeed": "23/08 08:00",
+  "fedToday": 4,         <span class="tok-c">// porções hoje</span>
+  "maxPerDay": 10,
+  "busy": false,         <span class="tok-c">// motor girando agora</span>
+  "total": 812,          <span class="tok-c">// porções desde sempre</span>
+  "cam": true,
+  "camErr": "",
+  "heap": 214532,
+  "up": 86400,           <span class="tok-c">// segundos ligado</span>
+  "fw": "1.0.0"
+}</code></pre>
+   <div class="note">Alerta útil: se <code>fedToday == 0</code> depois do horário da
+   primeira refeição, algo está errado. Se <code>time == "sem hora"</code>, a agenda
+   <b>não</b> vai disparar.</div>
+  </div>
+ </div>
+</section>
+
+<section id="feed">
+ <div class="ep">
+  <div class="ep-h"><span class="m post">POST</span><code>/api/feed?p=N</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Alimenta <code>N</code> porções (padrão 1). Respeita <b>todas</b> as travas de
+   segurança: máximo por acionamento, limite diário e intervalo mínimo.</p>
+   <pre><code>curl -b ck.txt -X POST "http://aquafeeder.local/api/feed?p=2"</code></pre>
+   <table>
+    <thead><tr><th>Código</th><th>Corpo</th><th>Quando</th></tr></thead>
+    <tbody>
+     <tr><td><b>200</b></td><td><code>{"ok":true}</code></td><td>enfileirado (retorna na hora, não espera o motor)</td></tr>
+     <tr><td><b>429</b></td><td><code>{"err":"Limite diário atingido (10 porções). Trava de segurança."}</code></td><td>estourou o máximo do dia</td></tr>
+     <tr><td><b>429</b></td><td><code>{"err":"Aguarde 32s (intervalo mínimo)."}</code></td><td>chamou muito rápido</td></tr>
+     <tr><td><b>429</b></td><td><code>{"err":"Já existe uma alimentação em andamento."}</code></td><td>motor ocupado</td></tr>
+     <tr><td><b>429</b></td><td><code>{"err":"Máximo por vez: 4 porções."}</code></td><td>N acima do limite</td></tr>
+    </tbody>
+   </table>
+   <div class="note">A resposta <b>200 não garante que a ração caiu</b> — só que o comando
+   foi aceito. Para confirmar de verdade, consulte <a href="#log">/api/log</a> depois de
+   uns segundos e olhe <code>ok</code> e <code>pulses</code> (precisa do sensor de grãos).</div>
+  </div>
+ </div>
+</section>
+
+<section id="jog">
+ <div class="ep">
+  <div class="ep-h"><span class="m post">POST</span><code>/api/jog?s=N</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Gira a rosca <code>N</code> passos crus, sem contar no limite diário. Negativo
+   recua. Serve para desentupir e para encher a rosca depois de limpar.</p>
+   <pre><code><span class="tok-c"># uma volta para frente (28BYJ = 4096, NEMA 1/8 = 1600)</span>
+curl -b ck.txt -X POST "http://aquafeeder.local/api/jog?s=4096"
+
+<span class="tok-c"># meia volta para trás</span>
+curl -b ck.txt -X POST "http://aquafeeder.local/api/jog?s=-2048"</code></pre>
+   <p>Limitado a ±4 voltas por chamada. <b>Avançar joga ração no aquário</b> — cuidado
+   para não usar como forma de alimentar, porque escapa das travas.</p>
+  </div>
+ </div>
+</section>
+
+<section id="config-get">
+ <div class="ep">
+  <div class="ep-h"><span class="m get">GET</span><code>/api/config</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Configuração completa e agenda. <b>Não devolve segredos</b> (senha do Wi-Fi, senha
+   da interface e token do Telegram nunca saem).</p>
+   <pre><code>{
+  "ssid": "MinhaRede", "host": "aquafeeder", "tz": "&lt;-03&gt;3",
+  "hasUiPass": true, "tgEnabled": true, "tgChat": "123456789", "tgNotify": true,
+  "stepsPerPortion": 1024, "stepUs": 1300, "reverse": false,
+  "maxPerDay": 10, "maxPerRequest": 4, "minIntervalS": 45, "catchUpMin": 90,
+  "sensorEnabled": false,
+  "camVflip": false, "camHmirror": false, "camSize": 2, "camQuality": 12,
+  "slots": [
+    {"en":true,"h":8,"m":0,"dow":127,"p":2},
+    {"en":true,"h":18,"m":0,"dow":127,"p":2},
+    {"en":false,"h":0,"m":0,"dow":127,"p":1}
+  ]
+}</code></pre>
+  </div>
+ </div>
+</section>
+
+<section id="config-post">
+ <div class="ep">
+  <div class="ep-h"><span class="m post">POST</span><code>/api/config</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Gravação <b>parcial</b>: mande só os campos que quer mudar. Salva na memória
+   permanente e aplica na hora.</p>
+   <pre><code><span class="tok-c"># mudar só a dose</span>
+curl -b ck.txt -X POST http://aquafeeder.local/api/config \
+     -d '{"stepsPerPortion":2048}'
+
+<span class="tok-c"># apertar a trava diária antes de viajar</span>
+curl -b ck.txt -X POST http://aquafeeder.local/api/config \
+     -d '{"maxPerDay":6,"maxPerRequest":2}'</code></pre>
+   <p>Resposta: <code>{"ok":true,"reboot":false}</code>. O campo <code>reboot</code> vem
+   <code>true</code> quando você mudou Wi-Fi (<code>ssid</code>/<code>pass</code>) ou
+   <code>host</code> — nesse caso o aparelho reinicia sozinho ~1 s depois.</p>
+   <table>
+    <thead><tr><th>Campo</th><th>Faixa</th><th>O que é</th></tr></thead>
+    <tbody>
+     <tr><td><code>stepsPerPortion</code></td><td>40–20000</td><td>passos por porção (a dose)</td></tr>
+     <tr><td><code>stepUs</code></td><td>1000–8000</td><td>µs entre passos (velocidade)</td></tr>
+     <tr><td><code>reverse</code></td><td>bool</td><td>inverte o sentido de giro</td></tr>
+     <tr><td><code>maxPerDay</code></td><td>1–60</td><td>trava diária</td></tr>
+     <tr><td><code>maxPerRequest</code></td><td>1–20</td><td>trava por acionamento</td></tr>
+     <tr><td><code>minIntervalS</code></td><td>0–3600</td><td>intervalo mínimo entre acionamentos</td></tr>
+     <tr><td><code>catchUpMin</code></td><td>0–720</td><td>janela para recuperar horário perdido</td></tr>
+     <tr><td><code>sensorEnabled</code></td><td>bool</td><td>sensor de grãos (exige reiniciar)</td></tr>
+     <tr><td><code>camSize</code></td><td>0–3</td><td>0=320×240 1=640×480 2=800×600 3=1280×720</td></tr>
+     <tr><td><code>camQuality</code></td><td>10–30</td><td>10 = melhor imagem, 30 = arquivo menor</td></tr>
+     <tr><td><code>camVflip</code>, <code>camHmirror</code></td><td>bool</td><td>gira / espelha a imagem</td></tr>
+     <tr><td><code>tz</code></td><td>string</td><td>fuso POSIX. Brasil: <code>&lt;-03&gt;3</code></td></tr>
+     <tr><td><code>slots</code></td><td>array de 8</td><td>a agenda, ver abaixo</td></tr>
+     <tr><td><code>uiPass</code>, <code>pass</code>, <code>tgToken</code></td><td>string</td><td>segredos: só entram, nunca saem</td></tr>
+    </tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section id="log">
+ <div class="ep">
+  <div class="ep-h"><span class="m get">GET</span><code>/api/log</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Últimas 24 alimentações, da mais nova para a mais antiga. O histórico vive em
+   memória — reiniciar limpa (o contador do dia e a última refeição, não).</p>
+   <pre><code>{"items":[
+  {"when":"23/08 18:00","p":2,"src":"agenda","pulses":15,"ok":true},
+  {"when":"23/08 12:31","p":1,"src":"telegram","pulses":7,"ok":true},
+  {"when":"23/08 08:00","p":2,"src":"agenda","pulses":0,"ok":false}
+]}</code></pre>
+   <table>
+    <thead><tr><th>Campo</th><th>Significado</th></tr></thead>
+    <tbody>
+     <tr><td><code>src</code></td><td><code>agenda</code>, <code>manual</code>, <code>telegram</code>, <code>botao</code> ou <code>jog</code></td></tr>
+     <tr><td><code>pulses</code></td><td>grãos contados pelo sensor (0 se não tem sensor)</td></tr>
+     <tr><td><code>ok</code></td><td><code>false</code> = o sensor não detectou ração nem depois de tentar desentupir</td></tr>
+    </tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section id="reboot">
+ <div class="ep">
+  <div class="ep-h"><span class="m post">POST</span><code>/api/reboot</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Responde <code>{"ok":true}</code> e reinicia ~700 ms depois. Todas as sessões caem.</p>
+  </div>
+ </div>
+</section>
+
+<section id="snapshot">
+ <div class="ep">
+  <div class="ep-h"><span class="m get">GET</span><code>/snapshot.jpg</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Um JPEG na resolução configurada.</p>
+   <pre><code>curl -b ck.txt http://aquafeeder.local/snapshot.jpg -o aquario.jpg</code></pre>
+   <p><b>503</b> <code>{"err":"câmera indisponível"}</code> se a câmera não inicializou —
+   veja <code>camErr</code> no status.</p>
+  </div>
+ </div>
+</section>
+
+<section id="stream">
+ <div class="ep">
+  <div class="ep-h"><span class="m get">GET</span><code>:81/stream</code>
+   <span class="auth">requer sessão</span></div>
+  <div class="ep-b">
+   <p>Vídeo MJPEG (<code>multipart/x-mixed-replace</code>), ~10 fps, em <b>porta
+   separada</b> para um cliente de vídeo não travar a API.</p>
+   <pre><code>&lt;img src="http://aquafeeder.local:81/stream"&gt;</code></pre>
+   <p>O cookie de sessão vale para as duas portas (cookie não distingue porta). Uma
+   conexão de vídeo consome quase toda a banda do Wi-Fi do ESP32 — use foto no dia a dia.</p>
+  </div>
+ </div>
+</section>
+
+<section id="erros">
+ <h2>Erros</h2>
+ <p>Erro sempre vem como <code>{"err":"mensagem em português"}</code> com o HTTP
+ correspondente:</p>
+ <table>
+  <thead><tr><th>Código</th><th>Significado</th></tr></thead>
+  <tbody>
+   <tr><td><b>400</b></td><td>corpo inválido ou parâmetro faltando</td></tr>
+   <tr><td><b>401</b></td><td>sem sessão ou senha errada — refaça o login</td></tr>
+   <tr><td><b>429</b></td><td>trava de segurança barrou (é o caso mais comum)</td></tr>
+   <tr><td><b>503</b></td><td>câmera indisponível</td></tr>
+  </tbody>
+ </table>
+ <div class="note">Como as sessões vivem em memória, um script de longa duração deve
+ tratar <b>401</b> refazendo o login automaticamente — é o que acontece depois de uma
+ queda de energia.</div>
+</section>
+
+<section id="slots">
+ <h2>Formato da agenda</h2>
+ <p>São sempre <b>8 slots</b>. Mande o array inteiro; os que faltarem viram
+ desabilitados.</p>
+ <pre><code>{"slots":[
+  {"en":true, "h":8,  "m":0,  "dow":127, "p":2},
+  {"en":true, "h":18, "m":30, "dow":62,  "p":1},
+  {"en":false,"h":0,  "m":0,  "dow":127, "p":1}
+]}</code></pre>
+ <table>
+  <thead><tr><th>Campo</th><th>Faixa</th><th>O que é</th></tr></thead>
+  <tbody>
+   <tr><td><code>en</code></td><td>bool</td><td>slot ativo</td></tr>
+   <tr><td><code>h</code> / <code>m</code></td><td>0–23 / 0–59</td><td>hora local do aparelho</td></tr>
+   <tr><td><code>dow</code></td><td>0–127</td><td>máscara de dias, bit 0 = domingo</td></tr>
+   <tr><td><code>p</code></td><td>1–20</td><td>porções nesse horário</td></tr>
+  </tbody>
+ </table>
+ <h3>Máscara de dias</h3>
+ <table>
+  <thead><tr><th>Dia</th><th>Bit</th><th>Valor</th></tr></thead>
+  <tbody>
+   <tr><td>domingo</td><td>0</td><td>1</td></tr>
+   <tr><td>segunda</td><td>1</td><td>2</td></tr>
+   <tr><td>terça</td><td>2</td><td>4</td></tr>
+   <tr><td>quarta</td><td>3</td><td>8</td></tr>
+   <tr><td>quinta</td><td>4</td><td>16</td></tr>
+   <tr><td>sexta</td><td>5</td><td>32</td></tr>
+   <tr><td>sábado</td><td>6</td><td>64</td></tr>
+  </tbody>
+ </table>
+ <p>Todos os dias = <code>127</code>. Só dias de semana = <code>2+4+8+16+32 = 62</code>.
+ Só fim de semana = <code>1+64 = 65</code>.</p>
+</section>
+
+<section id="exemplos">
+ <h2>Integrações</h2>
+
+ <h3>Python — alimentar e checar se caiu</h3>
+ <pre><code>import requests, time
+
+BASE = "http://aquafeeder.local"
+s = requests.Session()
+s.post(f"{BASE}/api/login", json={"pass": "minhasenha"}, timeout=5)
+
+r = s.post(f"{BASE}/api/feed", params={"p": 1}, timeout=5)
+if r.status_code != 200:
+    raise SystemExit("barrado: " + r.json()["err"])
+
+time.sleep(8)                                  <span class="tok-c"># espera o motor</span>
+ultimo = s.get(f"{BASE}/api/log", timeout=5).json()["items"][0]
+print(ultimo)
+if not ultimo["ok"]:
+    print("ALERTA: nao caiu racao!")</code></pre>
+
+ <h3>n8n — nó HTTP Request</h3>
+ <pre><code>1) HTTP Request  POST  http://aquafeeder.local/api/login
+   Body (JSON): {"pass":"minhasenha"}
+   Options → Response → Include Response Headers = true
+
+2) HTTP Request  POST  http://aquafeeder.local/api/feed?p=1
+   Headers: Cookie = af=&lt;token do passo 1&gt;</code></pre>
+ <p>Mais simples ainda: deixe a senha da interface vazia enquanto o alimentador estiver
+ só na LAN e chame o <code>/api/feed</code> direto, sem login. Menos seguro, muito menos
+ nó.</p>
+
+ <h3>Home Assistant — configuration.yaml</h3>
+ <pre><code>rest_command:
+  alimentar_peixes:
+    url: "http://aquafeeder.local/api/feed?p=1"
+    method: POST
+    headers:
+      Cookie: "af=SEU_TOKEN_AQUI"
+
+sensor:
+  - platform: rest
+    name: Aquario porcoes hoje
+    resource: "http://aquafeeder.local/api/status"
+    headers:
+      Cookie: "af=SEU_TOKEN_AQUI"
+    value_template: "{{ value_json.fedToday }}"
+    json_attributes: ["lastFeed","rssi","busy","cam"]
+    scan_interval: 300</code></pre>
+ <div class="warn">Token fixo no YAML só funciona até o aparelho reiniciar. Para algo que
+ nunca quebra, deixe a senha da interface vazia e proteja pela rede (VLAN de IoT, firewall
+ no roteador).</div>
+
+ <h3>Alerta caseiro: "não alimentou hoje"</h3>
+ <pre><code><span class="tok-c">#!/bin/bash
+# rode no cron as 21h: 0 21 * * * /caminho/checa.sh</span>
+B=http://aquafeeder.local
+curl -s -c /tmp/ck -X POST $B/api/login -d '{"pass":"minhasenha"}' &gt;/dev/null
+N=$(curl -s -b /tmp/ck $B/api/status | grep -o '"fedToday":[0-9]*' | cut -d: -f2)
+[ "${N:-0}" -lt 2 ] && echo "AquaFeeder: so $N porcoes hoje!" | mail -s alerta voce@email</code></pre>
+</section>
+
+<section id="cors">
+ <h2>CORS e uso pelo navegador</h2>
+ <p>O firmware <b>não</b> envia headers CORS. Isso é de propósito: impede que um site
+ qualquer aberto no seu navegador dispare comandos no alimentador. Consequências:</p>
+ <ul>
+  <li>Chamar a API por <code>fetch()</code> de <b>outra</b> origem (inclusive desta
+  página) é bloqueado pelo navegador.</li>
+  <li>A interface própria do alimentador funciona porque é servida pelo mesmo host.</li>
+  <li>O cookie é <code>SameSite=Lax</code>, então nem em requisição de terceiros ele
+  vaza.</li>
+ </ul>
+ <p>Por isso o gerador acima produz <b>comandos para o terminal</b> em vez de executar no
+ navegador. Se você quiser mesmo chamar de uma página externa, adicione o header em
+ <code>firmware/src/webserver.cpp</code> — e entenda que está abrindo mão dessa
+ proteção:</p>
+ <pre><code>httpd_resp_set_hdr(r, "Access-Control-Allow-Origin", "*");</code></pre>
+</section>
+
+</main>
+</div>
+
+<footer>
+ AquaFeeder ESP32-S3 ·
+ <a href="index.html">guia de montagem</a> ·
+ <a href="https://github.com/Gilson-Android/alimentador">GitHub</a>
+</footer>
+
+<script>
+// nav ativa
+const links=[...document.querySelectorAll('aside a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const spy=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting)
+    links.forEach(l=>l.classList.toggle('on', l.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-72px 0px -70% 0px'});
+secs.forEach(s=>spy.observe(s));
+
+// copiar
+document.querySelectorAll('pre').forEach(pre=>{
+  const b=document.createElement('button');
+  b.className='cp'; b.textContent='copiar';
+  b.onclick=()=>{navigator.clipboard.writeText(pre.querySelector('code').innerText.trim());
+    b.textContent='copiado!'; setTimeout(()=>b.textContent='copiar',1600);};
+  pre.appendChild(b);
+});
+
+// gerador de comandos
+const H=document.getElementById('gHost'), P=document.getElementById('gPass'),
+      A=document.getElementById('gAct'), O=document.getElementById('gOut');
+function gen(){
+  const b='http://'+(H.value||'aquafeeder.local'), p=(P.value||'').replace(/"/g,'\\"');
+  const CK='-b ck.txt';
+  const m={
+    login:`curl -c ck.txt -X POST ${b}/api/login \\\n     -d '{"pass":"${p}"}'`,
+    status:`curl ${CK} ${b}/api/status`,
+    feed1:`curl ${CK} -X POST "${b}/api/feed?p=1"`,
+    feed2:`curl ${CK} -X POST "${b}/api/feed?p=2"`,
+    jogf:`curl ${CK} -X POST "${b}/api/jog?s=1024"`,
+    jogr:`curl ${CK} -X POST "${b}/api/jog?s=-1024"`,
+    log:`curl ${CK} ${b}/api/log`,
+    config:`curl ${CK} ${b}/api/config`,
+    slots:`curl ${CK} -X POST ${b}/api/config \\\n     -d '{"slots":[{"en":true,"h":8,"m":0,"dow":127,"p":2},{"en":true,"h":18,"m":0,"dow":127,"p":2}]}'`,
+    photo:`curl ${CK} ${b}/snapshot.jpg -o aquario.jpg`,
+    reboot:`curl ${CK} -X POST ${b}/api/reboot`
+  };
+  O.textContent=m[A.value];
+}
+[H,P,A].forEach(e=>e.oninput=gen); A.onchange=gen; gen();
+</script>
+</body>
+</html>
