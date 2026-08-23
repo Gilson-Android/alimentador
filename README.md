@@ -73,7 +73,7 @@ Para girar as peças, esconder o funil, ver em corte ou explodido, abra
 | Cabo 4 vias / jumpers fêmea-fêmea | ~1 m | 10 |
 | Parafusos M3×8 (3), M3×10 (8), M3×12 (2), M3×16 (2), M4×12 (2), M2×6 (2) | — | 15 |
 | Parafuso M4×30 + porca M4 (aperto da braçadeira) | 1 | 3 |
-| Filamento **PETG** | ~240 g | 20 |
+| Filamento **PETG** | ~270 g | 22 |
 | *Opcional:* sensor óptico TCRT5000 ou par IR (confirma que caiu ração) | 1 | 8 |
 | *Opcional:* sachê de sílica gel (anti-umidade dentro do funil) | 1 | 2 |
 
@@ -85,7 +85,7 @@ Alternativas de placa que o firmware já suporta: **XIAO ESP32S3 Sense**
 
 ## Ordem de execução
 
-1. **[Imprimir](docs/01-impressao.md)** — comece pela peça de teste (`test_fit.stl`, ~10 min).
+1. **[Imprimir](docs/01-impressao.md)** — comece pela peça de teste (`peca_de_teste.stl`, ~10 min).
    Só depois imprima o resto.
 2. **[Eletrônica](docs/02-eletronica.md)** — 6 fios, nada de solda obrigatória.
 3. **[Montagem](docs/03-montagem.md)** — parafusar as duas metades do tubo, funil, calha, braçadeira.

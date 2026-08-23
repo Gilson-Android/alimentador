@@ -103,6 +103,7 @@ pre code{background:none;border:0;padding:0;color:#c8d6e2;font-size:13.2px;line-
 .tok-c{color:#6b7885}.tok-k{color:#c678dd}.tok-s{color:#98c379}
 
 figure{margin:18px 0}
+figure.diag svg{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;background:#0b0f14;padding:10px 6px}
 figure img{width:100%;border:1px solid var(--line);border-radius:12px;display:block;
   background:#0b0f14;cursor:zoom-in}
 figcaption{color:var(--dim);font-size:13px;margin-top:8px;text-align:center}
@@ -214,7 +215,7 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
   para conferir se está tudo bem. Todas as peças saem da impressora 3D e o firmware
   é um único ESP32-S3.</p>
   <div class="pills">
-   <span class="pill"><b>~240 g</b> de PETG</span>
+   <span class="pill"><b>~265 g</b> de PETG</span>
    <span class="pill"><b>~R$ 200</b> no total</span>
    <span class="pill">reservatório <b>300 ml</b></span>
    <span class="pill">dose de <b>0,23 ml</b></span>
@@ -371,7 +372,7 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  <h2>Imprimir as peças</h2>
 
  <div class="warn"><b>Imprima primeiro a peça de teste.</b>
- <code class="only-28byj">stl/motor_28byj/test_fit.stl</code><code class="only-nema17">stl/motor_nema17/test_fit.stl</code>
+ <code class="only-28byj">stl/motor_28byj/peca_de_teste.stl</code><code class="only-nema17">stl/motor_nema17/peca_de_teste.stl</code>
  — 10 minutos, 9 g. Ela tem quatro gabaritos: furos do motor, encaixe do eixo, socket do
  funil e amostra do funil. Parafuse o motor de verdade nela. Se estiver apertado, mude
  <code>fit = 0.10</code> em <code>cad/common.scad</code>, rode <code>cad/build.sh</code>
@@ -401,25 +402,25 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  <table>
   <thead><tr><th>Arquivo</th><th>Massa</th><th>Observação</th></tr></thead>
   <tbody>
-   <tr class="only-28byj"><td><code>motor_28byj/auger.stl</code></td><td>3 g</td><td>a rosca; imprime em pé, cubo na mesa</td></tr>
-   <tr class="only-nema17"><td><code>motor_nema17/auger.stl</code></td><td>4 g</td><td>a rosca; cubo mais longo para engolir o eixo do NEMA</td></tr>
-   <tr class="only-28byj"><td><code>motor_28byj/barrel_a.stl</code></td><td>10 g</td><td>metade do tubo — <b>furos roscados</b> M3</td></tr>
-   <tr class="only-28byj"><td><code>motor_28byj/barrel_b.stl</code></td><td>10 g</td><td>metade do tubo — furos passantes com rebaixo</td></tr>
-   <tr class="only-nema17"><td><code>motor_nema17/barrel_a.stl</code></td><td>13 g</td><td>metade do tubo — <b>furos roscados</b> M3</td></tr>
-   <tr class="only-nema17"><td><code>motor_nema17/barrel_b.stl</code></td><td>13 g</td><td>metade do tubo — furos passantes com rebaixo</td></tr>
-   <tr><td><code>hopper.stl</code></td><td>49 g</td><td>funil ~300 ml, sai translúcido (dá para ver o nível)</td></tr>
-   <tr><td><code>lid.stl</code></td><td>26 g</td><td>tampa do funil</td></tr>
-   <tr><td><code>chute.stl</code></td><td>6 g</td><td>calha de saída</td></tr>
-   <tr><td><code>chute_com_sensor.stl</code></td><td>6 g</td><td>alternativa: com 2 furos de 3,4 mm para o sensor óptico</td></tr>
-   <tr><td><code>bracket.stl</code></td><td>66 g</td><td>braçadeira + mastro + berço; imprime em pé, 38 mm</td></tr>
-   <tr><td><code>saddle_cap.stl</code></td><td>2 g</td><td>tampa do berço</td></tr>
-   <tr><td><code>knob.stl</code></td><td>6 g</td><td>manípulo do aperto</td></tr>
-   <tr><td><code>box_base.stl</code></td><td>31 g</td><td>caixa da eletrônica</td></tr>
-   <tr><td><code>box_lid.stl</code></td><td>14 g</td><td>tampa da caixa</td></tr>
-   <tr><td><code>cam_pod.stl</code></td><td>15 g</td><td>suporte da câmera (já com o giro que desvia do funil)</td></tr>
+   <tr class="only-28byj"><td><code>motor_28byj/rosca.stl</code></td><td>3 g</td><td>a rosca; imprime em pé, cubo na mesa</td></tr>
+   <tr class="only-nema17"><td><code>motor_nema17/rosca.stl</code></td><td>4 g</td><td>a rosca; cubo mais longo para engolir o eixo do NEMA</td></tr>
+   <tr class="only-28byj"><td><code>motor_28byj/tubo_metade_a.stl</code></td><td>10 g</td><td>metade do tubo — <b>furos roscados</b> M3</td></tr>
+   <tr class="only-28byj"><td><code>motor_28byj/tubo_metade_b.stl</code></td><td>10 g</td><td>metade do tubo — furos passantes com rebaixo</td></tr>
+   <tr class="only-nema17"><td><code>motor_nema17/tubo_metade_a.stl</code></td><td>13 g</td><td>metade do tubo — <b>furos roscados</b> M3</td></tr>
+   <tr class="only-nema17"><td><code>motor_nema17/tubo_metade_b.stl</code></td><td>13 g</td><td>metade do tubo — furos passantes com rebaixo</td></tr>
+   <tr><td><code>funil.stl</code></td><td>65 g</td><td>reservatório ~300 ml, translúcido (dá para ver o nível); 124 mm de altura</td></tr>
+   <tr><td><code>tampa_do_funil.stl</code></td><td>26 g</td><td>tampa do funil</td></tr>
+   <tr><td><code>calha.stl</code></td><td>6 g</td><td>calha de saída</td></tr>
+   <tr><td><code>calha_com_sensor.stl</code></td><td>6 g</td><td>alternativa: com 2 furos de 3,4 mm para o sensor óptico</td></tr>
+   <tr><td><code>bracadeira.stl</code></td><td>66 g</td><td>braçadeira + mastro + berço; imprime em pé, 38 mm</td></tr>
+   <tr><td><code>tampa_do_berco.stl</code></td><td>2 g</td><td>tampa do berço</td></tr>
+   <tr><td><code>manipulo.stl</code></td><td>6 g</td><td>manípulo do aperto</td></tr>
+   <tr><td><code>caixa_eletronica.stl</code></td><td>31 g</td><td>caixa da eletrônica</td></tr>
+   <tr><td><code>tampa_da_caixa.stl</code></td><td>14 g</td><td>tampa da caixa</td></tr>
+   <tr><td><code>suporte_da_camera.stl</code></td><td>15 g</td><td>suporte da câmera (já com o giro que desvia do funil)</td></tr>
   </tbody>
  </table>
- <p>Total ≈ <b>240 g</b>. Cabe em duas mesas na K1 Max. Sugestão: mesa 1 =
+ <p>Total ≈ <b>255 a 270 g</b>. Cabe em duas mesas na K1 Max. Sugestão: mesa 1 =
  <code>bracket</code> + <code>hopper</code> + <code>lid</code>; mesa 2 = o resto.</p>
 
  <h3>Detalhes que importam</h3>
@@ -439,8 +440,93 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  <div class="kicker">06 — Eletrônica</div>
  <h2>Ligações</h2>
 
+ <!-- ======================= 28BYJ-48 ======================= -->
  <div class="only-28byj">
  <p>São 6 fios. Não precisa soldar nada se usar jumpers fêmea-fêmea.</p>
+
+ <figure class="diag">
+ <svg viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="Esquema de ligacao do 28BYJ-48 com ULN2003">
+  <style>
+   .bx{fill:#161d26;stroke:#3a4756;stroke-width:1.6}
+   .bx2{fill:#101820;stroke:#2f3a48;stroke-width:1.4}
+   .t{fill:#e6edf3;font:600 13px system-ui,sans-serif}
+   .ts{fill:#8b98a5;font:11px system-ui,sans-serif}
+   .tp{fill:#c8d6e2;font:600 11px ui-monospace,monospace}
+   .tw{font:600 10.5px ui-monospace,monospace}
+   .w{fill:none;stroke-width:2.6;stroke-linejoin:round}
+  </style>
+  <rect class="bx" x="18" y="30" width="150" height="66" rx="9"/>
+  <text class="t" x="34" y="56">FONTE 5 V</text>
+  <text class="ts" x="34" y="76">2 A · carregador USB serve</text>
+  <circle cx="168" cy="52" r="4" fill="#ffb454"/>
+  <circle cx="168" cy="80" r="4" fill="#8b98a5"/>
+  <text class="tp" x="140" y="47" text-anchor="end" fill="#ffb454">+5V</text>
+  <text class="tp" x="140" y="85" text-anchor="end" fill="#8b98a5">GND</text>
+
+  <rect class="bx" x="250" y="120" width="180" height="230" rx="9"/>
+  <text class="t" x="340" y="148" text-anchor="middle">ESP32-S3</text>
+  <text class="ts" x="340" y="165" text-anchor="middle">Freenove CAM</text>
+  <rect class="bx2" x="272" y="288" width="136" height="42" rx="7"/>
+  <text class="ts" x="340" y="314" text-anchor="middle">flat da câmera</text>
+  <circle cx="250" cy="196" r="4" fill="#ffb454"/><text class="tp" x="262" y="200">5V</text>
+  <circle cx="250" cy="226" r="4" fill="#8b98a5"/><text class="tp" x="262" y="230">GND</text>
+  <circle cx="430" cy="196" r="4" fill="#3ddc97"/><text class="tp" x="418" y="200" text-anchor="end">GPIO 1</text>
+  <circle cx="430" cy="222" r="4" fill="#4c9aff"/><text class="tp" x="418" y="226" text-anchor="end">GPIO 2</text>
+  <circle cx="430" cy="248" r="4" fill="#ffd166"/><text class="tp" x="418" y="252" text-anchor="end">GPIO 41</text>
+  <circle cx="430" cy="274" r="4" fill="#c678dd"/><text class="tp" x="418" y="278" text-anchor="end">GPIO 42</text>
+
+  <rect class="bx" x="580" y="120" width="150" height="230" rx="9"/>
+  <text class="t" x="655" y="148" text-anchor="middle">ULN2003</text>
+  <text class="ts" x="655" y="165" text-anchor="middle">placa do driver</text>
+  <circle cx="580" cy="196" r="4" fill="#3ddc97"/><text class="tp" x="592" y="200">IN1</text>
+  <circle cx="580" cy="222" r="4" fill="#4c9aff"/><text class="tp" x="592" y="226">IN2</text>
+  <circle cx="580" cy="248" r="4" fill="#ffd166"/><text class="tp" x="592" y="252">IN3</text>
+  <circle cx="580" cy="274" r="4" fill="#c678dd"/><text class="tp" x="592" y="278">IN4</text>
+  <circle cx="580" cy="312" r="4" fill="#ffb454"/><text class="tp" x="592" y="316">5V</text>
+  <circle cx="580" cy="336" r="4" fill="#8b98a5"/><text class="tp" x="592" y="340">GND</text>
+  <rect class="bx2" x="676" y="180" width="54" height="120" rx="7"/>
+  <text class="ts" x="703" y="245" text-anchor="middle" transform="rotate(90 703 245)">conector 5 vias</text>
+
+  <rect class="bx" x="790" y="196" width="92" height="92" rx="46"/>
+  <text class="t" x="836" y="238" text-anchor="middle">28BYJ</text>
+  <text class="t" x="836" y="256" text-anchor="middle">-48</text>
+
+  <path class="w" stroke="#ffb454" d="M168 52 H210 V196 H250"/>
+  <path class="w" stroke="#ffb454" d="M210 96 H545 V312 H580"/>
+  <path class="w" stroke="#8b98a5" d="M168 80 H228 V226 H250"/>
+  <path class="w" stroke="#8b98a5" d="M228 110 H560 V336 H580"/>
+  <circle cx="210" cy="96" r="4.5" fill="#ffb454"/>
+  <circle cx="228" cy="110" r="4.5" fill="#8b98a5"/>
+  <path class="w" stroke="#3ddc97" d="M430 196 H580"/>
+  <path class="w" stroke="#4c9aff" d="M430 222 H580"/>
+  <path class="w" stroke="#ffd166" d="M430 248 H580"/>
+  <path class="w" stroke="#c678dd" d="M430 274 H580"/>
+  <path class="w" stroke="#8b98a5" d="M730 240 H790"/>
+
+  <path class="w" stroke="#ffb454" d="M470 312 V370"/>
+  <path class="w" stroke="#8b98a5" d="M500 336 V386"/>
+  <circle cx="470" cy="312" r="4.5" fill="#ffb454"/>
+  <circle cx="500" cy="336" r="4.5" fill="#8b98a5"/>
+  <line x1="452" y1="371" x2="488" y2="371" stroke="#ffb454" stroke-width="3"/>
+  <line x1="452" y1="382" x2="488" y2="382" stroke="#8b98a5" stroke-width="3"/>
+  <path class="w" stroke="#8b98a5" d="M470 382 V386 H500"/>
+  <text class="ts" x="512" y="378">470–1000 µF</text>
+  <text class="ts" x="512" y="392">junto do driver!</text>
+
+  <g transform="translate(18,412)">
+   <line x1="0" y1="-4" x2="22" y2="-4" stroke="#ffb454" stroke-width="2.6"/>
+   <text class="tw" x="28" y="0" fill="#ffb454">5 V</text>
+   <line x1="70" y1="-4" x2="92" y2="-4" stroke="#8b98a5" stroke-width="2.6"/>
+   <text class="tw" x="98" y="0" fill="#8b98a5">GND</text>
+   <line x1="150" y1="-4" x2="172" y2="-4" stroke="#3ddc97" stroke-width="2.6"/>
+   <text class="tw" x="178" y="0" fill="#c8d6e2">sinais IN1–IN4</text>
+  </g>
+ </svg>
+ <figcaption>O ESP32 e o ULN2003 saem da <b>mesma</b> fonte de 5 V, com GND comum, e o
+ eletrolítico fica junto do driver.</figcaption>
+ </figure>
+
  <table>
   <thead><tr><th>ULN2003</th><th>ESP32-S3</th><th>Por quê</th></tr></thead>
   <tbody>
@@ -452,74 +538,254 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
    <tr><td>GND</td><td>GND comum</td><td>fonte, ESP32 e driver no <b>mesmo</b> GND</td></tr>
   </tbody>
  </table>
- <pre><code>      FONTE 5V 2A
-        +5V ──────────┬──────────────┬──────────┐
-        GND ──────┬───┼──────────┬───┼──────────┼──┐
-                  │   │          │   │          │  │
-               ESP32-S3        ULN2003      C1 470-1000uF
-               5V    GND       5V   GND     (+)     (-)
-
-   GPIO 1  ─────►  IN1        ULN2003 ──► motor 28BYJ-48
-   GPIO 2  ─────►  IN2        (conector branco de 5 vias)
-   GPIO 41 ─────►  IN3
-   GPIO 42 ─────►  IN4</code></pre>
  </div>
 
+ <!-- ======================= NEMA 17 / DRV8825 ======================= -->
  <div class="only-nema17">
- <p>Com NEMA 17 são 3 sinais de controle + potência de 12 V.</p>
+ <p>Com NEMA 17 são 3 sinais de controle, 4 jumpers de configuração e potência de 12 V.
+ O esquema abaixo é para <b>DRV8825</b> — o driver vermelho da Pololu e seus clones.</p>
+
+ <figure class="diag">
+ <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="Esquema de ligacao do NEMA 17 com driver DRV8825">
+  <style>
+   .bx{fill:#161d26;stroke:#3a4756;stroke-width:1.6}
+   .bx2{fill:#101820;stroke:#2f3a48;stroke-width:1.4}
+   .drv{fill:#2a1418;stroke:#8c3a45;stroke-width:1.8}
+   .t{fill:#e6edf3;font:600 13px system-ui,sans-serif}
+   .ts{fill:#8b98a5;font:11px system-ui,sans-serif}
+   .tp{fill:#c8d6e2;font:600 11px ui-monospace,monospace}
+   .tw{font:600 10.5px ui-monospace,monospace}
+   .w{fill:none;stroke-width:2.6;stroke-linejoin:round}
+  </style>
+
+  <rect class="bx" x="16" y="24" width="150" height="62" rx="9"/>
+  <text class="t" x="32" y="50">FONTE 12 V</text>
+  <text class="ts" x="32" y="70">2 A</text>
+  <circle cx="166" cy="44" r="4" fill="#ff6b6b"/>
+  <circle cx="166" cy="70" r="4" fill="#8b98a5"/>
+  <text class="tp" x="140" y="39" text-anchor="end" fill="#ff6b6b">+12V</text>
+  <text class="tp" x="140" y="86" text-anchor="end" fill="#8b98a5">GND</text>
+
+  <rect class="bx" x="16" y="176" width="150" height="74" rx="9"/>
+  <text class="t" x="32" y="202">STEP-DOWN 5 V</text>
+  <text class="ts" x="32" y="220">MP1584 ou LM2596</text>
+  <text class="ts" x="32" y="238">ajuste a saída antes!</text>
+  <circle cx="56" cy="176" r="4" fill="#ff6b6b"/>
+  <circle cx="106" cy="176" r="4" fill="#8b98a5"/>
+  <text class="tp" x="44" y="168" text-anchor="middle" fill="#ff6b6b">IN+</text>
+  <text class="tp" x="116" y="168" text-anchor="middle" fill="#8b98a5">IN−</text>
+  <circle cx="166" cy="200" r="4" fill="#ffb454"/>
+  <circle cx="166" cy="228" r="4" fill="#8b98a5"/>
+  <text class="tp" x="176" y="196" fill="#ffb454">OUT +5V</text>
+  <text class="tp" x="176" y="242" fill="#8b98a5">OUT −</text>
+
+  <rect class="bx" x="258" y="116" width="176" height="300" rx="9"/>
+  <text class="t" x="346" y="144" text-anchor="middle">ESP32-S3</text>
+  <text class="ts" x="346" y="161" text-anchor="middle">Freenove CAM</text>
+  <rect class="bx2" x="278" y="352" width="136" height="42" rx="7"/>
+  <text class="ts" x="346" y="378" text-anchor="middle">flat da câmera</text>
+  <circle cx="258" cy="200" r="4" fill="#ffb454"/><text class="tp" x="270" y="204">5V</text>
+  <circle cx="258" cy="228" r="4" fill="#8b98a5"/><text class="tp" x="270" y="232">GND</text>
+  <circle cx="434" cy="186" r="4" fill="#3ddc97"/><text class="tp" x="422" y="190" text-anchor="end">GPIO 1</text>
+  <circle cx="434" cy="216" r="4" fill="#4c9aff"/><text class="tp" x="422" y="220" text-anchor="end">GPIO 2</text>
+  <circle cx="434" cy="246" r="4" fill="#ffd166"/><text class="tp" x="422" y="250" text-anchor="end">GPIO 41</text>
+  <circle cx="434" cy="300" r="4" fill="#c678dd"/><text class="tp" x="422" y="304" text-anchor="end">3V3</text>
+  <circle cx="434" cy="330" r="4" fill="#8b98a5"/><text class="tp" x="422" y="334" text-anchor="end">GND</text>
+
+  <rect class="drv" x="596" y="104" width="150" height="330" rx="9"/>
+  <text class="t" x="671" y="132" text-anchor="middle">DRV8825</text>
+  <text class="ts" x="671" y="148" text-anchor="middle">não tem pino VDD</text>
+  <circle cx="596" cy="176" r="4" fill="#ffd166"/><text class="tp" x="608" y="180">EN</text>
+  <circle cx="596" cy="206" r="4" fill="#c678dd"/><text class="tp" x="608" y="210">M0</text>
+  <circle cx="596" cy="236" r="4" fill="#c678dd"/><text class="tp" x="608" y="240">M1</text>
+  <circle cx="596" cy="266" r="4" fill="#8b98a5"/><text class="tp" x="608" y="270">M2</text>
+  <circle cx="596" cy="306" r="4" fill="#c678dd"/><text class="tp" x="608" y="310">RST</text>
+  <circle cx="596" cy="336" r="4" fill="#c678dd"/><text class="tp" x="608" y="340">SLP</text>
+  <circle cx="596" cy="376" r="4" fill="#3ddc97"/><text class="tp" x="608" y="380">STEP</text>
+  <circle cx="596" cy="406" r="4" fill="#4c9aff"/><text class="tp" x="608" y="410">DIR</text>
+  <circle cx="746" cy="176" r="4" fill="#ff6b6b"/><text class="tp" x="734" y="180" text-anchor="end">VMOT</text>
+  <circle cx="746" cy="206" r="4" fill="#8b98a5"/><text class="tp" x="734" y="210" text-anchor="end">GND</text>
+  <circle cx="746" cy="246" r="4" fill="#ff8fd0"/><text class="tp" x="734" y="250" text-anchor="end">B2</text>
+  <circle cx="746" cy="276" r="4" fill="#ff8fd0"/><text class="tp" x="734" y="280" text-anchor="end">B1</text>
+  <circle cx="746" cy="306" r="4" fill="#7ee8fa"/><text class="tp" x="734" y="310" text-anchor="end">A1</text>
+  <circle cx="746" cy="336" r="4" fill="#7ee8fa"/><text class="tp" x="734" y="340" text-anchor="end">A2</text>
+  <text class="tp" x="734" y="380" text-anchor="end" fill="#6b7885">FAULT</text>
+  <circle cx="746" cy="406" r="4" fill="#8b98a5"/><text class="tp" x="734" y="410" text-anchor="end">GND</text>
+  <circle cx="671" cy="424" r="13" fill="#0e1319" stroke="#8c3a45" stroke-width="1.6"/>
+  <line x1="671" y1="414" x2="671" y2="434" stroke="#c8d6e2" stroke-width="2"/>
+  <text class="ts" x="671" y="456" text-anchor="middle">trimpot = Vref</text>
+
+  <rect class="bx" x="836" y="236" width="108" height="108" rx="9"/>
+  <text class="t" x="890" y="282" text-anchor="middle">NEMA 17</text>
+  <circle cx="890" cy="308" r="12" fill="#0e1319" stroke="#3a4756" stroke-width="1.6"/>
+  <circle cx="890" cy="308" r="4" fill="#8b98a5"/>
+  <text class="ts" x="890" y="366" text-anchor="middle">eixo 5 mm</text>
+
+  <path class="w" stroke="#ff6b6b" d="M166 44 H790 V176 H746"/>
+  <path class="w" stroke="#ff6b6b" d="M206 44 V176 H56"/>
+  <circle cx="206" cy="44" r="4.5" fill="#ff6b6b"/>
+  <path class="w" stroke="#8b98a5" d="M166 70 H806 V406 H746"/>
+  <path class="w" stroke="#8b98a5" d="M232 70 V176 H106"/>
+  <path class="w" stroke="#8b98a5" d="M244 70 V228 H258"/>
+  <circle cx="232" cy="70" r="4.5" fill="#8b98a5"/>
+  <circle cx="244" cy="70" r="4.5" fill="#8b98a5"/>
+  <path class="w" stroke="#ffb454" d="M166 200 H258"/>
+
+  <path class="w" stroke="#3ddc97" d="M434 186 H456 V376 H596"/>
+  <path class="w" stroke="#4c9aff" d="M434 216 H470 V406 H596"/>
+  <path class="w" stroke="#ffd166" d="M434 246 H484 V176 H596"/>
+
+  <path class="w" stroke="#c678dd" d="M434 300 H520 V206 H596"/>
+  <path class="w" stroke="#c678dd" d="M520 236 H596"/>
+  <path class="w" stroke="#c678dd" d="M520 306 H596"/>
+  <path class="w" stroke="#c678dd" d="M520 336 H596"/>
+  <circle cx="520" cy="236" r="4.5" fill="#c678dd"/>
+  <circle cx="520" cy="300" r="4.5" fill="#c678dd"/>
+  <circle cx="520" cy="306" r="4.5" fill="#c678dd"/>
+  <circle cx="520" cy="336" r="4.5" fill="#c678dd"/>
+  <path class="w" stroke="#8b98a5" d="M434 330 H556 V266 H596"/>
+
+  <path class="w" stroke="#ff8fd0" d="M746 246 H800 V262 H836"/>
+  <path class="w" stroke="#ff8fd0" d="M746 276 H784 V286 H836"/>
+  <path class="w" stroke="#7ee8fa" d="M746 306 H784 V310 H836"/>
+  <path class="w" stroke="#7ee8fa" d="M746 336 H800 V334 H836"/>
+
+  <path class="w" stroke="#ff6b6b" d="M790 128 H794"/>
+  <line x1="794" y1="114" x2="794" y2="142" stroke="#ff6b6b" stroke-width="3.4"/>
+  <line x1="803" y1="114" x2="803" y2="142" stroke="#8b98a5" stroke-width="3.4"/>
+  <path class="w" stroke="#8b98a5" d="M803 128 H806"/>
+  <circle cx="790" cy="128" r="4.5" fill="#ff6b6b"/>
+  <circle cx="806" cy="128" r="4.5" fill="#8b98a5"/>
+  <text class="ts" x="814" y="124">100 µF</text>
+  <text class="ts" x="814" y="139">colado no driver</text>
+
+  <g transform="translate(16,540)">
+   <line x1="0" y1="-4" x2="22" y2="-4" stroke="#ff6b6b" stroke-width="2.6"/>
+   <text class="tw" x="28" y="0" fill="#ff6b6b">12 V</text>
+   <line x1="76" y1="-4" x2="98" y2="-4" stroke="#ffb454" stroke-width="2.6"/>
+   <text class="tw" x="104" y="0" fill="#ffb454">5 V</text>
+   <line x1="146" y1="-4" x2="168" y2="-4" stroke="#c678dd" stroke-width="2.6"/>
+   <text class="tw" x="174" y="0" fill="#c678dd">3V3 = nível alto</text>
+   <line x1="300" y1="-4" x2="322" y2="-4" stroke="#8b98a5" stroke-width="2.6"/>
+   <text class="tw" x="328" y="0" fill="#8b98a5">GND</text>
+   <line x1="386" y1="-4" x2="408" y2="-4" stroke="#3ddc97" stroke-width="2.6"/>
+   <text class="tw" x="414" y="0" fill="#c8d6e2">STEP</text>
+   <line x1="466" y1="-4" x2="488" y2="-4" stroke="#4c9aff" stroke-width="2.6"/>
+   <text class="tw" x="494" y="0" fill="#c8d6e2">DIR</text>
+   <line x1="536" y1="-4" x2="558" y2="-4" stroke="#ffd166" stroke-width="2.6"/>
+   <text class="tw" x="564" y="0" fill="#c8d6e2">ENABLE</text>
+   <line x1="642" y1="-8" x2="664" y2="-8" stroke="#ff8fd0" stroke-width="2.6"/>
+   <line x1="642" y1="2" x2="664" y2="2" stroke="#7ee8fa" stroke-width="2.6"/>
+   <text class="tw" x="670" y="-1" fill="#c8d6e2">bobinas do motor</text>
+  </g>
+ </svg>
+ <figcaption><b>M0 e M1 em 3V3, M2 em GND</b> = 1/8 de micropasso, que é o que o firmware
+ espera. <b>RST e SLP também em 3V3</b>, senão o driver nunca sai do reset.</figcaption>
+ </figure>
+
  <table>
-  <thead><tr><th>Driver (A4988/DRV8825)</th><th>Ligar em</th><th>Observação</th></tr></thead>
+  <thead><tr><th>Pino do DRV8825</th><th>Ligar em</th><th>Observação</th></tr></thead>
   <tbody>
    <tr><td>STEP</td><td><b>GPIO 1</b></td><td></td></tr>
    <tr><td>DIR</td><td><b>GPIO 2</b></td><td></td></tr>
-   <tr><td>ENABLE</td><td><b>GPIO 41</b></td><td>ativo em nível baixo; o firmware desliga o motor quando para</td></tr>
-   <tr><td>VDD (lógica)</td><td>3V3 do ESP32</td><td>A4988 e DRV8825 aceitam lógica de 3,3 V</td></tr>
-   <tr><td>GND (lógica)</td><td>GND comum</td><td></td></tr>
-   <tr><td>VMOT / GND</td><td>+12 V da fonte</td><td><b>100 µF eletrolítico direto nesses pinos</b></td></tr>
-   <tr><td>RESET + SLEEP</td><td>curto entre eles</td><td>senão o driver nunca sai do reset</td></tr>
-   <tr><td>MS1, MS2</td><td>3V3 (A4988)</td><td>1/8 de micropasso — é o que o firmware espera</td></tr>
-   <tr><td>1A 1B 2A 2B</td><td>bobinas do motor</td><td>1A+1B = uma bobina, 2A+2B = a outra</td></tr>
+   <tr><td>EN</td><td><b>GPIO 41</b></td><td>ativo em nível baixo; o firmware solta o motor quando para</td></tr>
+   <tr><td>M0, M1</td><td>3V3 do ESP32</td><td>M2=0 M1=1 M0=1 → <b>1/8 de micropasso</b></td></tr>
+   <tr><td>M2</td><td>GND</td><td>idem</td></tr>
+   <tr><td>RST, SLP</td><td>3V3 do ESP32</td><td>os dois; sem isso o driver fica em reset</td></tr>
+   <tr><td>VMOT + GND (de cima)</td><td>+12 V da fonte</td><td><b>100 µF eletrolítico direto nesses dois pinos</b></td></tr>
+   <tr><td>GND (de baixo)</td><td>GND comum</td><td>mesmo GND do ESP32 e da fonte</td></tr>
+   <tr><td>A1 A2 / B1 B2</td><td>bobinas do motor</td><td>A1+A2 são a <b>mesma</b> bobina; B1+B2 a outra</td></tr>
+   <tr><td>FAULT</td><td>—</td><td>deixe solto</td></tr>
   </tbody>
  </table>
- <div class="warn"><b>Ajuste o limite de corrente antes de ligar o motor.</b> Com o motor
- desconectado, meça a tensão no trimpot (Vref) e ajuste:
- <br>A4988 (sense 0,1 Ω): <code>Vref = corrente × 0,8</code> → 0,4 V para 0,5 A
- <br>DRV8825: <code>Vref = corrente ÷ 2</code> → 0,25 V para 0,5 A
- <br>0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.</div>
- <div class="note">Não sabe quais fios são de cada bobina? Meça continuidade com o
- multímetro: os dois fios que têm continuidade entre si são uma bobina. Se o motor
- vibrar sem girar, você misturou as bobinas — troque 1B com 2A.</div>
- <div class="note">Micropasso em outros drivers: <b>DRV8825</b> → M0 e M1 em nível alto,
- M2 em baixo. <b>TMC2208/2209</b> → MS1 e MS2 em nível baixo (já é 1/8 por padrão) e ele
- roda quase sem ruído.</div>
- <pre><code>   FONTE 12V ──┬── VMOT (driver)  ── C 100uF ── GND
-               └── step-down 5V ──► ESP32-S3 (5V)
 
-   ESP32 3V3 ──► VDD driver          RESET ─┐
-   ESP32 GND ──► GND driver (comum)  SLEEP ─┘ (em curto)
-   GPIO 1  ──► STEP      MS1 ──┐
-   GPIO 2  ──► DIR       MS2 ──┴── 3V3   (1/8 de micropasso)
-   GPIO 41 ──► ENABLE
-   1A 1B 2A 2B ──► bobinas do NEMA 17</code></pre>
+ <div class="note"><b>O DRV8825 não tem pino VDD.</b> Diferente do A4988, ele gera a
+ lógica dele internamente a partir do VMOT — então <b>não existe fio de 3,3 V alimentando
+ o driver</b>. O 3V3 do ESP32 aparece no esquema só para puxar M0, M1, RST e SLP para
+ nível alto. Consequência prática: <b>sem os 12 V o driver está morto</b>, mesmo com o
+ ESP32 ligado e piscando.</div>
+
+ <div class="warn"><b>Ajuste o limite de corrente ANTES de ligar o motor.</b> Com o motor
+ desconectado e os 12 V ligados, meça a tensão entre o cursor do trimpot e o GND:
+ <br><code>Vref = corrente ÷ 2</code> → <b>0,25 V para 0,5 A</b> (essa é a conta do
+ DRV8825; no A4988 é <code>corrente × 0,8</code>).
+ <br>0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.</div>
+
+ <div class="note"><b>Descobrir os pares de bobina:</b> meça continuidade com o
+ multímetro. Os dois fios que têm continuidade entre si são uma bobina — vão em A1/A2. Os
+ outros dois vão em B1/B2. Se o motor vibrar no lugar sem girar, você misturou os pares:
+ troque A2 com B1.</div>
+
+ <div class="note">Outros drivers: <b>A4988</b> → MS1 e MS2 em 3V3, MS3 em GND, e ele
+ <i>precisa</i> de VDD em 3V3. <b>TMC2208/2209</b> → MS1 e MS2 em GND (já é 1/8 de
+ fábrica) e roda quase sem ruído.</div>
  </div>
 
  <div class="danger"><b>O capacitor não é opcional.</b> O motor dá picos de corrente a
  cada passo. Sem o eletrolítico junto do driver, o pico derruba a tensão e você vê:
- câmera falhando ao inicializar, reset aleatório e Wi-Fi caindo na hora de alimentar.
- Respeite a polaridade — perna comprida é o positivo.</div>
+ câmera falhando ao inicializar, reset aleatório e Wi-Fi caindo exatamente na hora de
+ alimentar. Respeite a polaridade — a faixa clara no corpo marca o negativo.</div>
 
  <h3>Sensor de grãos (opcional, mas vale para viagem)</h3>
  <p>Confirma que a ração realmente caiu. Sem ele, o alimentador "acha" que alimentou
  mesmo com a rosca travada ou o funil vazio.</p>
+
+ <figure class="diag">
+ <svg viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" role="img"
+      aria-label="Esquema do sensor optico de graos">
+  <style>
+   .t{fill:#e6edf3;font:600 12.5px system-ui,sans-serif}
+   .ts{fill:#8b98a5;font:11px system-ui,sans-serif}
+   .tp{fill:#c8d6e2;font:600 11px ui-monospace,monospace}
+   .w{fill:none;stroke-width:2.4;stroke-linejoin:round}
+  </style>
+  <line x1="60" y1="34" x2="640" y2="34" stroke="#c678dd" stroke-width="2.4"/>
+  <text class="tp" x="60" y="26" fill="#c678dd">3V3</text>
+  <line x1="60" y1="216" x2="640" y2="216" stroke="#8b98a5" stroke-width="2.4"/>
+  <text class="tp" x="60" y="234" fill="#8b98a5">GND</text>
+
+  <path class="w" stroke="#c678dd" d="M170 34 V70"/>
+  <rect x="156" y="70" width="28" height="40" fill="#101820" stroke="#8b98a5" stroke-width="1.4" rx="3"/>
+  <text class="ts" x="196" y="86">150 Ω</text>
+  <path class="w" stroke="#c678dd" d="M170 110 V140"/>
+  <polygon points="158,140 182,140 170,159" fill="#2a1418" stroke="#ff6b6b" stroke-width="1.6"/>
+  <line x1="156" y1="161" x2="184" y2="161" stroke="#ff6b6b" stroke-width="2.4"/>
+  <text class="ts" x="196" y="150">LED infravermelho</text>
+  <text class="ts" x="196" y="165">3 mm (o transparente)</text>
+  <path class="w" stroke="#8b98a5" d="M170 161 V216"/>
+
+  <line x1="212" y1="150" x2="404" y2="150" stroke="#ffd166" stroke-width="1.6" stroke-dasharray="5 5"/>
+  <text class="ts" x="308" y="196" text-anchor="middle" fill="#ffd166">o feixe atravessa a calha</text>
+
+  <path class="w" stroke="#c678dd" d="M470 34 V70"/>
+  <rect x="456" y="70" width="28" height="40" fill="#101820" stroke="#8b98a5" stroke-width="1.4" rx="3"/>
+  <text class="ts" x="496" y="86">10 kΩ</text>
+  <text class="ts" x="496" y="102">pull-up</text>
+  <path class="w" stroke="#c678dd" d="M470 110 V132"/>
+  <circle cx="470" cy="158" r="24" fill="#101820" stroke="#7ee8fa" stroke-width="1.6"/>
+  <line x1="470" y1="134" x2="470" y2="146" stroke="#7ee8fa" stroke-width="2.4"/>
+  <line x1="470" y1="170" x2="470" y2="216" stroke="#8b98a5" stroke-width="2.4"/>
+  <text class="ts" x="502" y="155">fototransistor</text>
+  <text class="ts" x="502" y="170">3 mm (o escuro)</text>
+
+  <path class="w" stroke="#3ddc97" d="M470 122 H600 V96"/>
+  <circle cx="470" cy="122" r="4" fill="#3ddc97"/>
+  <rect x="546" y="52" width="108" height="44" fill="#161d26" stroke="#3a4756" stroke-width="1.6" rx="7"/>
+  <text class="t" x="600" y="80" text-anchor="middle">GPIO 21</text>
+ </svg>
+ <figcaption>Grão passando bloqueia o feixe: o pino sobe e desce, e o firmware conta a
+ borda de descida de cada grão.</figcaption>
+ </figure>
+
  <ul>
-  <li>Imprima a calha na variante <code>chute_com_sensor.stl</code>: ela tem dois furos
-  de 3,4 mm alinhados, um de cada lado do duto.</li>
-  <li>Encaixe por pressão um <b>LED IR de 3 mm</b> num furo e um <b>fototransistor de
-  3 mm</b> no outro. Cada grão que passa corta o feixe e gera um pulso.</li>
-  <li>Alimente com <b>3,3 V</b> (a entrada do ESP32 não é 5 V tolerante). Resistor de
-  150 Ω em série no LED e 10 kΩ do coletor para o 3V3.</li>
-  <li>Saída digital → <b>GPIO 21</b>. Ligue em <i>Ajustes → Sensor de grãos</i> e
-  reinicie.</li>
+  <li>Imprima a calha na variante <code>calha_com_sensor.stl</code>: ela tem dois furos de
+  3,4 mm alinhados, um de cada lado do duto. Os LEDs de 3 mm entram por pressão e tampam
+  o furo.</li>
+  <li>Alimente com <b>3,3 V</b>, nunca 5 V — a entrada do ESP32 não é 5 V tolerante.</li>
+  <li>Um módulo <b>TCRT5000</b> pronto (VCC/GND/D0) também serve: aponte para o furo e
+  ligue D0 no GPIO 21.</li>
+  <li>Ligue em <i>Ajustes → Sensor de grãos</i> e <b>reinicie</b> o aparelho.</li>
  </ul>
  <p>Se o sensor estiver ligado e nada for detectado, o firmware recua a rosca, tenta de
  novo e — se ainda nada — registra falha no histórico e manda aviso no Telegram.</p>
@@ -532,9 +798,13 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
   <li>Janela do USB-C numa ponta — essa ponta fica para <b>cima</b> na montagem.</li>
   <li>Dois furos de 7,5 mm na outra ponta para os cabos saírem <b>para baixo</b>.</li>
  </ul>
- <div class="note"><b>Confira com paquímetro</b> a distância entre os furos da sua placa
- e ajuste <code>b1_hx</code> / <code>b1_hy</code> em <code>cad/common.scad</code> antes
- de imprimir a caixa. O padrão (55 × 20 mm) é para a placa Freenove.</div>
+ <div class="note"><b>Confira com paquímetro</b> a distância entre os furos da sua placa e
+ ajuste <code>b1_hx</code> / <code>b1_hy</code> em <code>cad/common.scad</code> antes de
+ imprimir a caixa. O padrão (55 × 20 mm) é para a placa Freenove.</div>
+ <div class="warn only-nema17"><b>Calor:</b> o DRV8825 é bem menor que a placa do ULN2003,
+ então sobra espaço na caixa — mas ele esquenta. Deixe o dissipador virado para as fendas
+ de ventilação e não encoste nada nele. O step-down também aquece: mantenha os dois
+ separados.</div>
  <div class="note"><b>Laço de gotejamento:</b> deixe os cabos saírem por baixo da caixa e
  subirem em curva. Se um dia escorrer água pelo cabo, ela pinga no chão em vez de entrar
  na caixa.</div>
@@ -558,7 +828,7 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
    <tr><td>Metades do tubo (orelhas)</td><td>M3 × 8</td><td>3</td></tr>
    <tr class="only-28byj"><td>Motor no prato</td><td>M3 × 10</td><td>2</td></tr>
    <tr class="only-nema17"><td>Motor no prato (rosca no próprio motor)</td><td>M3 × 10</td><td>4</td></tr>
-   <tr><td>Funil no colar do tubo</td><td>M3 × 10</td><td>2</td></tr>
+   <tr><td>Funil no colar do tubo</td><td>M3 × 12</td><td>2</td></tr>
    <tr><td>Tampa do berço na braçadeira</td><td>M3 × 16</td><td>2</td></tr>
    <tr><td>Tampa da caixa</td><td>M3 × 10</td><td>4</td></tr>
    <tr><td>Caixa no mastro</td><td>M4 × 12</td><td>2</td></tr>

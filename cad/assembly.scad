@@ -42,8 +42,8 @@ module aquafeeder() {
 
     // ---- funil -----------------------------------------------------
     if (SHOW_HOPPER) {
-        color("#cfd6dd", 0.55) translate([collar_cx, 0, collar_z1 + e*44]) hopper();
-        color("#9aa5b1") translate([collar_cx, 0, collar_z1 + 101.2 + 2.6 + e*66])
+        color("#cfd6dd", 0.55) translate([collar_cx, 0, lug_top + e*44]) hopper();
+        color("#9aa5b1") translate([collar_cx, 0, lug_top + 101.2 + 2.6 + e*66])
             rotate([180, 0, 0]) lid();
     }
 

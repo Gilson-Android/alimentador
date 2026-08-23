@@ -11,8 +11,9 @@ Como fica por dentro (corte no meio do tubo):
 | Onde | Parafuso | Qtd |
 |---|---|---|
 | Metades do tubo (orelhas) | M3 × 8 | 3 |
-| Motor no prato | M3 × 10 | 2 |
-| Funil no colar do tubo | M3 × 10 | 2 |
+| Motor no prato — 28BYJ-48 | M3 × 10 | 2 |
+| Motor no prato — NEMA 17 | M3 × 10 | 4 |
+| Funil no colar do tubo | M3 × 12 | 2 |
 | Tampa do berço na braçadeira | M3 × 16 | 2 |
 | Tampa da caixa | M3 × 10 | 4 |
 | Caixa no mastro | M4 × 12 | 2 |
@@ -29,9 +30,13 @@ apertar até o fim da força.
 ## Passo 1 — rosca no tubo
 
 1. Limpe a rebarba da hélice da rosca (`auger`) com um estilete.
-2. Encaixe o eixo do motor 28BYJ-48 no cubo da rosca. Deve entrar com pressão
-   firme dos dedos. Se estiver duro, alargue o encaixe com uma lima fina; se
-   estiver frouxo, uma gota de cola instantânea resolve.
+2. Encaixe o eixo do motor no cubo da rosca:
+   - **28BYJ-48:** o eixo é achatado dos dois lados e entra com pressão firme dos
+     dedos. Duro? Lima fina. Frouxo? Uma gota de cola instantânea.
+   - **NEMA 17:** o eixo é redondo e liso. Ele entra justo no cubo (que é fundo o
+     bastante para engolir os 20–25 mm de eixo, sem precisar cortar nada) e depois
+     você trava com o **parafuso M3 radial**. Dica: lime um pequeno chanfro no
+     eixo no ponto onde o parafuso encosta — aí ele não escorrega nunca mais.
 3. Deite a rosca na metade **B** do tubo, com a ponta fina (mancal traseiro) no
    fundo da bolsa e o cubo do lado do prato do motor.
 4. Feche com a metade **A** e aperte os **3 M3 × 8** nas orelhas
@@ -42,13 +47,19 @@ apertar até o fim da força.
 
 ## Passo 2 — motor
 
-Parafuse o motor no prato com **2 M3 × 10** (roscam direto no plástico, entre devagar), com o corpo dele **para baixo**.
-O ressalto do eixo entra no rebaixo do prato — isso é o que garante o alinhamento.
+**28BYJ-48:** parafuse no prato com **2 M3 × 10** (roscam direto no plástico, entre
+devagar), com o corpo do motor **para baixo**. O ressalto do eixo entra no rebaixo
+do prato — é isso que garante o alinhamento.
+
+**NEMA 17:** parafuse com **4 M3 × 10** no quadrado de 31 mm. Os parafusos entram
+pelo lado de dentro (entre o prato e o tubo) e roscam na carcaça do próprio motor,
+então use chave allen com ponta esférica. O ressalto de 22 mm do motor entra no
+rebaixo do prato.
 
 ## Passo 3 — funil
 
 1. Encaixe o spigot (a saia quadrada) do funil no socket do tubo.
-2. Parafuse os **2 M3 × 10** do flange nas orelhas do colar. Esses dois
+2. Parafuse os **2 M3 × 12** do flange nas orelhas do colar. Esses dois
    parafusos também prendem as duas metades do tubo na região do colar.
 3. Jogue um sachê de sílica gel dentro do funil antes de pôr ração.
 
@@ -62,10 +73,12 @@ A boca inclinada da calha aponta **para dentro do aquário**.
 
 1. Encaixe a porca M4 no alojamento sextavado da garra externa (se ficar
    folgada, uma gota de cola).
-2. Rosqueie o M4 × 30 e encaixe o manípulo (`knob`) na cabeça.
-3. Apoie a braçadeira na borda do aquário, deite o tubo no berço (na região
-   livre entre o colar e a calha) e feche com a tampa do berço (`saddle_cap`) +
-   **2 M3 × 16**.
+2. Rosqueie o M4 × 30 e encaixe o manípulo na cabeça.
+3. Apoie a braçadeira na borda do aquário, deite o tubo no berço e feche com a
+   tampa do berço + **2 M3 × 16**. Onde o berço abraça o tubo depende do motor
+   (é a mesma peça, só muda a posição):
+   - **28BYJ-48:** berço em x = 11 a 49 mm, tampa em x = 40 a 49 mm
+   - **NEMA 17:** berço em x = 24 a 62 mm, tampa em x = 53 a 62 mm
 4. Aperte o manípulo até firmar na borda. **Não precisa de força de macaco** —
    plástico racha.
 

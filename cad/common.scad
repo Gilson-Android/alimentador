@@ -28,19 +28,39 @@ auger_od     = 14.0;   // diametro externo da helice
 auger_core   = 6.0;    // diametro do nucleo
 auger_pitch  = 9.0;    // passo da helice (avanco por volta)
 flight_t     = 1.6;    // espessura vertical da aleta
-hub_d        = 13.6;   // cubo dianteiro (funciona como mancal no tubo)
+hub_d        = 14.6;   // cubo dianteiro (funciona como mancal no tubo)
 // O cubo tem que ser fundo o suficiente para engolir o eixo do motor.
 // O NEMA 17 tem eixo liso de ~20-25mm, por isso o cubo dele e maior --
 // e por isso a janela de entrada comeca mais para tras (ver abaixo).
 hub_len      = (motor_type == "NEMA17") ? 22.0 : 11.0;
 stub_d       = 5.8;    // ponta traseira (segundo mancal)
 stub_len     = 3.2;
-radial_clear = 0.40;   // folga radial helice <-> tubo
+// Folga radial helice <-> tubo. Cada metade do tubo imprime com a face plana
+// na mesa, entao o "teto" do furo (que na montagem fica na LATERAL, na altura
+// do eixo) e um arco e cede uns 0.2-0.4mm na impressao. A folga de 0.6 existe
+// para engolir essa barriga: com 0.4 a helice raspava.
+radial_clear = 0.60;
 
 // Volume teorico por volta:
 //   area do canal = pi/4*(od^2 - core^2) = 125.7 mm2
 //   volume/volta  = area * (passo - espessura_aleta) ~= 0.93 ml
 //   1 porcao padrao no firmware = 1/4 de volta ~= 0.23 ml
+
+// ---------------------------------------------------------------------
+//  Funil (hopper) ~ 300 ml
+// ---------------------------------------------------------------------
+hop_wall    = 2.2;
+hop_bot     = 25.6;    // spigot: entra no socket de 26.0
+hop_top     = 86.0;
+hop_taper_h = 95.0;
+hop_insert  = 10.0;    // trecho reto que entra no socket do colar
+hop_cham    = 9.0;     // chanfro (40 graus) entre o spigot e o flange
+hop_spig_h  = hop_insert + hop_cham;
+hop_rim     = 3.0;     // aba superior onde a tampa agarra
+hop_rim_ch  = 3.5;     // chanfro embaixo do aro (inclusive nos cantos!)
+hop_flg_x   = 34.0;    // flange
+hop_flg_y   = 41.0;
+hop_flg_t   = 3.2;
 
 // ---------------------------------------------------------------------
 //  Tubo transportador (barrel) -- eixo ao longo de X, de x=0 a x=barrel_len
@@ -65,8 +85,13 @@ socket_sq   = 26.0;                     // lado INTERNO do socket do funil
 collar_wall = 2.8;
 collar_z0   = 4;                        // base do colar (dentro do tubo)
 collar_z1   = 21;                       // topo do colar = apoio do flange do funil
-lug_t       = 6;                        // orelhas do colar (M3 -> flange do funil)
-lug_y       = 19.3;                     // centro das orelhas em Y
+// Orelhas do colar: recebem os 2 parafusos do flange do funil. Elas sobem
+// hop_cham acima do topo do colar porque o flange do funil ficou mais alto --
+// e o flange subiu para caber um chanfro de 40 graus embaixo dele, senao o
+// funil precisaria de suporte na impressao.
+lug_y       = 16.0;                     // centro das orelhas em Y
+lug_top     = collar_z1 + hop_cham;     // face de apoio do flange
+lug_t       = lug_top - 15;             // espessura da orelha
 
 boss_x      = 18;    // boss da calha (encaixe), comprimento em X
 boss_y      = 21;    // largura em Y
@@ -126,17 +151,6 @@ n17_shaft_d  = 5.0;    // eixo liso de 5mm
 n17_plate    = 52;     // lado do prato
 n17_plate_t  = 4.5;
 n17_socket_d = 20;     // encaixe fundo: engole eixo de ate ~24mm sem cortar
-
-// ---------------------------------------------------------------------
-//  Funil (hopper) ~ 300 ml
-// ---------------------------------------------------------------------
-hop_wall    = 2.2;
-hop_bot     = 25.6;    // spigot: entra no socket de 26.0
-hop_top     = 86.0;
-hop_taper_h = 95.0;
-hop_spig_h  = 10.0;
-hop_rim     = 3.0;     // aba superior onde a tampa agarra
-hop_rim_out = 6.0;
 
 // ---------------------------------------------------------------------
 //  Bracadeira do aquario

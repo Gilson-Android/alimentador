@@ -21,26 +21,26 @@ render() {
 }
 
 echo "Pecas iguais para qualquer motor:"
-render $ROOT hopper.scad     hopper.stl
-render $ROOT lid.scad        lid.stl
-render $ROOT chute.scad      chute.stl
-render $ROOT chute.scad      chute_com_sensor.stl -D 'sensor_holes=true'
-render $ROOT bracket.scad    bracket.stl
-render $ROOT saddle_cap.scad saddle_cap.stl
-render $ROOT knob.scad       knob.stl
-render $ROOT box_base.scad   box_base.stl
-render $ROOT box_lid.scad    box_lid.stl
-render $ROOT cam_pod.scad    cam_pod.stl
+render $ROOT hopper.scad     funil.stl
+render $ROOT lid.scad        tampa_do_funil.stl
+render $ROOT chute.scad      calha.stl
+render $ROOT chute.scad      calha_com_sensor.stl -D 'sensor_holes=true'
+render $ROOT bracket.scad    bracadeira.stl
+render $ROOT saddle_cap.scad tampa_do_berco.stl
+render $ROOT knob.scad       manipulo.stl
+render $ROOT box_base.scad   caixa_eletronica.stl
+render $ROOT box_lid.scad    tampa_da_caixa.stl
+render $ROOT cam_pod.scad    suporte_da_camera.stl
 
 # ---------------------------------------------------------------------
 # Pecas que dependem do motor. Imprima SO a pasta do seu motor.
 for m in 28BYJ NEMA17; do
   d=$ROOT/motor_$(echo $m | tr 'A-Z' 'a-z')
   echo "Pecas do motor $m:"
-  render $d test_fit.scad test_fit.stl               -D "motor_type=\"$m\""
-  render $d auger.scad    auger.stl                  -D "motor_type=\"$m\""
-  render $d barrel.scad   barrel_a.stl -D 'PART="A"' -D "motor_type=\"$m\""
-  render $d barrel.scad   barrel_b.stl -D 'PART="B"' -D "motor_type=\"$m\""
+  render $d test_fit.scad peca_de_teste.stl               -D "motor_type=\"$m\""
+  render $d auger.scad    rosca.stl                  -D "motor_type=\"$m\""
+  render $d barrel.scad   tubo_metade_a.stl -D 'PART="A"' -D "motor_type=\"$m\""
+  render $d barrel.scad   tubo_metade_b.stl -D 'PART="B"' -D "motor_type=\"$m\""
 done
 
 # ---------------------------------------------------------------------

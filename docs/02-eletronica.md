@@ -1,8 +1,16 @@
 # 2. Eletrônica
 
-São 6 fios. Não precisa soldar nada se usar jumpers fêmea-fêmea.
+> **Esquema visual colorido:** [guia no site → Eletrônica](https://gilson-android.github.io/alimentador/#eletronica).
+> Lá tem o diagrama de ligação desenhado, com as cores de cada fio. Este arquivo é
+> a versão em texto, para consultar offline.
 
-## Ligações (placa padrão: Freenove ESP32-S3-WROOM CAM)
+O projeto suporta dois motores. Escolha a sua seção.
+
+---
+
+## Opção A — 28BYJ-48 + ULN2003 (5 V)
+
+São 6 fios. Não precisa soldar nada se usar jumpers fêmea-fêmea.
 
 ```
       FONTE 5V 2A
@@ -31,19 +39,93 @@ São 6 fios. Não precisa soldar nada se usar jumpers fêmea-fêmea.
 | 5 V | +5 V da fonte | motor puxa até ~500 mA, não tire do 3V3 |
 | GND | GND comum | **o GND da fonte, do ESP32 e do driver tem que ser o mesmo** |
 
-### O capacitor não é opcional
+Compile com `pio run -e freenove_s3_cam -t upload`.
 
-O 28BYJ-48 dá picos de corrente a cada passo. Sem um eletrolítico de
-**470–1000 µF** ligado entre 5 V e GND **junto do ULN2003**, o pico derruba a
-tensão e você vê: câmera falhando ao inicializar, reset aleatório, Wi-Fi caindo
-na hora de alimentar. Respeite a polaridade (perna comprida = +).
+---
 
-### Sensor de grãos (opcional, mas recomendado para viagem)
+## Opção B — NEMA 17 + DRV8825 (12 V)
+
+```
+   FONTE 12V ──┬── VMOT (driver) ── C 100uF entre VMOT e GND
+               └── step-down 5V ──► ESP32-S3 (pino 5V)
+
+   GND da fonte ──► GND do ESP32 ──► GND do driver   (tudo no mesmo GND)
+
+   ESP32 GPIO 1  ──► STEP        M0 ──┐
+   ESP32 GPIO 2  ──► DIR         M1 ──┴─► 3V3   (1/8 de micropasso)
+   ESP32 GPIO 41 ──► EN          M2 ────► GND
+   ESP32 3V3     ──► RST + SLP
+   A1 A2 ──► bobina 1 do motor
+   B1 B2 ──► bobina 2 do motor
+```
+
+| Pino do DRV8825 | Ligar em | Observação |
+|---|---|---|
+| STEP | GPIO 1 | |
+| DIR | GPIO 2 | |
+| EN | GPIO 41 | ativo em nível baixo; o firmware solta o motor quando para |
+| M0, M1 | 3V3 do ESP32 | M2=0 M1=1 M0=1 → **1/8 de micropasso** |
+| M2 | GND | idem |
+| RST, SLP | 3V3 do ESP32 | os dois; sem isso o driver fica em reset |
+| VMOT + GND (de cima) | +12 V da fonte | **100 µF eletrolítico direto nesses dois pinos** |
+| GND (de baixo) | GND comum | mesmo GND do ESP32 e da fonte |
+| A1 A2 / B1 B2 | bobinas do motor | A1+A2 são a **mesma** bobina; B1+B2 a outra |
+| FAULT | — | deixe solto |
+
+**O DRV8825 não tem pino VDD.** Diferente do A4988, ele gera a lógica dele
+internamente a partir do VMOT — não existe fio de 3,3 V *alimentando* o driver. O
+3V3 do ESP32 serve só para puxar M0, M1, RST e SLP para nível alto. Consequência:
+**sem os 12 V o driver está morto**, mesmo com o ESP32 ligado.
+
+### Limite de corrente — faça antes de ligar o motor
+
+Com o motor **desconectado** e os 12 V ligados, meça a tensão entre o cursor do
+trimpot e o GND:
+
+- **DRV8825:** `Vref = corrente ÷ 2` → **0,25 V para 0,5 A**
+- A4988: `Vref = corrente × 0,8` → 0,4 V para 0,5 A
+
+0,4 a 0,6 A é mais que suficiente para a rosca e mantém o driver frio.
+
+### Achar os pares de bobina
+
+Meça continuidade com o multímetro: os dois fios que têm continuidade entre si
+são uma bobina, e vão em A1/A2. Os outros dois vão em B1/B2. Se o motor vibrar no
+lugar sem girar, você misturou os pares — troque A2 com B1.
+
+### Outros drivers
+
+| Driver | Micropasso 1/8 | Precisa de VDD? |
+|---|---|---|
+| DRV8825 | M0=H, M1=H, M2=L | não |
+| A4988 | MS1=H, MS2=H, MS3=L | **sim**, 3V3 |
+| TMC2208/2209 | MS1=L, MS2=L (padrão) | sim, 3V3 |
+
+Compile com `pio run -e freenove_s3_cam_nema17 -t upload`.
+
+O DRV8825 esquenta: deixe o dissipador virado para as fendas de ventilação da
+caixa e não encoste nada nele. O step-down também aquece — mantenha os dois
+separados.
+
+---
+
+## O capacitor não é opcional (vale para os dois motores)
+
+O motor de passo dá picos de corrente a cada passo. Sem o eletrolítico ligado
+entre a alimentação e o GND **junto do driver**, o pico derruba a tensão e você
+vê: câmera falhando ao inicializar, reset aleatório, Wi-Fi caindo exatamente na
+hora de alimentar. Respeite a polaridade — a faixa clara no corpo marca o
+negativo.
+
+- 28BYJ-48 / ULN2003: **470–1000 µF** entre 5 V e GND
+- NEMA 17 / DRV8825: **100 µF** entre VMOT e GND
+
+## Sensor de grãos (opcional, mas recomendado para viagem)
 
 Confirma que a ração realmente caiu. Sem ele, o alimentador "acha" que alimentou
 mesmo se a rosca estiver travada ou o funil vazio.
 
-- Imprima a calha na variante **`chute_com_sensor.stl`**: ela tem dois furos de
+- Imprima a calha na variante **`calha_com_sensor.stl`**: ela tem dois furos de
   3,4 mm alinhados, um de cada lado do duto. Encaixe por pressão um **LED IR de
   3 mm** num furo e um **fototransistor de 3 mm** no outro — o feixe atravessa
   o duto e cada grão que passa gera um pulso. (Um módulo **TCRT5000**
@@ -55,16 +137,20 @@ mesmo se a rosca estiver travada ou o funil vazio.
 - Ligue em *Ajustes → Sensor de grãos* e **reinicie** o aparelho.
 
 Se o sensor estiver ligado e nenhum grão for detectado, o firmware recua a
-rosca 400 passos, tenta de novo e — se ainda nada — registra falha no histórico
-e manda aviso no Telegram.
+rosca, tenta de novo e — se ainda nada — registra falha no histórico e manda
+aviso no Telegram.
 
 ## Alimentação
 
-Um carregador de celular de 5 V / 2 A resolve. Ligue os dois consumidores
-(placa e driver) **na mesma fonte**, em paralelo, com fio de 22 AWG ou mais grosso.
+**28BYJ-48:** um carregador de celular de 5 V / 2 A resolve. Ligue placa e driver
+na mesma fonte, em paralelo, com fio de 22 AWG ou mais grosso.
 
-Não use powerbank como fonte fixa: muitos desligam sozinhos quando o consumo
-cai (o alimentador fica em repouso a maior parte do tempo).
+**NEMA 17:** fonte de 12 V / 2 A + um step-down (MP1584 ou LM2596) para tirar os
+5 V do ESP32. **Ajuste a saída do step-down para 5,0 V antes de ligar na placa** —
+esses módulos saem de fábrica em qualquer tensão.
+
+Não use powerbank como fonte fixa: muitos desligam sozinhos quando o consumo cai
+(o alimentador fica em repouso a maior parte do tempo).
 
 **Nobreak:** se sua região tem queda de luz frequente, vale plugar a fonte num
 nobreak pequeno. Mas o firmware já recupera o horário perdido quando a energia
@@ -72,11 +158,11 @@ volta — veja `catchUpMin` em Ajustes.
 
 ## Montagem dentro da caixa
 
-A caixa (`box_base`) tem:
+A caixa (`caixa_eletronica.stl`) tem:
 
-- pinos para a placa ESP32-S3 (esquerda) e para o ULN2003 (direita) — para
+- pinos para a placa ESP32-S3 (esquerda) e para o driver (direita) — para
   parafuso auto-atarraxante M2,5;
-- **fendas de abracadeira** como plano B: se os furos da sua placa não baterem
+- **fendas de abraçadeira** como plano B: se os furos da sua placa não baterem
   com os pinos, prenda com abraçadeira de nylon ou fita dupla face e ignore os pinos;
 - janela para o USB-C numa das pontas (essa ponta fica para **cima** na montagem);
 - dois furos de 7,5 mm na outra ponta para os cabos saírem **para baixo**;
