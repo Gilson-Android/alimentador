@@ -33,10 +33,13 @@ apertar até o fim da força.
 2. Encaixe o eixo do motor no cubo da rosca:
    - **28BYJ-48:** o eixo é achatado dos dois lados e entra com pressão firme dos
      dedos. Duro? Lima fina. Frouxo? Uma gota de cola instantânea.
-   - **NEMA 17:** o eixo é redondo e liso. Ele entra justo no cubo (que é fundo o
-     bastante para engolir os 20–25 mm de eixo, sem precisar cortar nada) e depois
-     você trava com o **parafuso M3 radial**. Dica: lime um pequeno chanfro no
-     eixo no ponto onde o parafuso encosta — aí ele não escorrega nunca mais.
+   - **NEMA 17:** o cubo é fundo o bastante para engolir 20–25 mm de eixo, sem
+     precisar cortar nada. O eixo desliza com folga de 0,35 mm — é de propósito:
+     furo vertical em FDM sai menor que o nominal, e quem centra a rosca são os
+     mancais dela (o cubo e a ponta), não o eixo. Quem tira a folga e pega o
+     torque são os **dois parafusos M3 radiais** (a 90° um do outro): gire a rosca
+     até um deles cair em cima do **achatado do eixo** e aperte. Se o seu eixo for
+     redondo liso, lime um chanfro onde o parafuso encosta.
 3. Deite a rosca na metade **B** do tubo, com a ponta fina (mancal traseiro) no
    fundo da bolsa e o cubo do lado do prato do motor.
 4. Feche com a metade **A** e aperte os **3 M3 × 8** nas orelhas

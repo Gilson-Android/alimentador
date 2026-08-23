@@ -41,8 +41,10 @@ module shaft_gauge() {
     if (motor_type == "NEMA17") {
         difference() {
             cylinder(d = hub_d, h = 16);
-            translate([0, 0, -eps]) cylinder(d = n17_shaft_d + 0.15 + fit, h = 14);
-            translate([0, 0, 7]) rotate([0, 90, 0]) cylinder(d = m3_tap, h = hub_d);
+            translate([0, 0, -eps])
+                cylinder(d = n17_shaft_d + 2*n17_socket_c + fit, h = 14);
+            translate([0, 0, 7])  rotate([0, 90, 0]) cylinder(d = m3_tap, h = hub_d);
+            translate([0, 0, 12]) rotate([90, 0, 0]) cylinder(d = m3_tap, h = hub_d);
         }
     } else {
         difference() {

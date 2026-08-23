@@ -36,12 +36,13 @@ module auger() {
         }
         // encaixe do eixo do motor
         if (motor_type == "NEMA17") {
-            // eixo liso de 5mm: encaixe justo (entra com pressao) ...
+            // Encaixe redondo com folga de deslize (ver n17_socket_c).
             translate([0, 0, -eps])
-                cylinder(d = n17_shaft_d + 0.15 + fit, h = n17_socket_d + eps);
-            // ... e um parafuso M3 radial travando contra o eixo.
-            // Lime um chanfro no eixo do motor: fica indeslizavel.
-            translate([0, 0, 7]) rotate([0, 90, 0]) cylinder(d = m3_tap, h = hub_d);
+                cylinder(d = n17_shaft_d + 2*n17_socket_c + fit, h = n17_socket_d + eps);
+            // DOIS parafusos M3 radiais a 90 graus: use o que cair em cima do
+            // achatado do eixo (ou os dois). E o achatado que pega o torque.
+            translate([0, 0, 7])  rotate([0, 90, 0]) cylinder(d = m3_tap, h = hub_d);
+            translate([0, 0, 12]) rotate([90, 0, 0]) cylinder(d = m3_tap, h = hub_d);
         } else {
             translate([0, 0, -eps]) dshaft(socket_depth + eps, 0.15 + fit/2);
         }
