@@ -53,13 +53,18 @@ hop_wall    = 2.2;
 hop_bot     = 25.6;    // spigot: entra no socket de 26.0
 hop_top     = 86.0;
 hop_taper_h = 95.0;
+// O flange do funil apoia DIRETO no topo do colar. Ja tentei levantar o flange
+// 9mm para caber um chanfro de 40 graus embaixo dele (e dispensar suporte), mas
+// as orelhas do colar precisavam subir junto e passavam a ocupar o mesmo espaco
+// do chanfro -- as duas pecas colidiam. Teste: cad/check_interferencia.scad.
+// Fica assim: o funil pede suporte so embaixo do flange, area pequena e plana.
 hop_insert  = 10.0;    // trecho reto que entra no socket do colar
-hop_cham    = 9.0;     // chanfro (40 graus) entre o spigot e o flange
-hop_spig_h  = hop_insert + hop_cham;
+hop_cham    = 0;       // sem chanfro (ver acima)
+hop_spig_h  = hop_insert;
 hop_rim     = 3.0;     // aba superior onde a tampa agarra
 hop_rim_ch  = 3.5;     // chanfro embaixo do aro (inclusive nos cantos!)
 hop_flg_x   = 34.0;    // flange
-hop_flg_y   = 41.0;
+hop_flg_y   = 52.0;   // precisa alcancar as orelhas em y = +-19.3
 hop_flg_t   = 3.2;
 
 // ---------------------------------------------------------------------
@@ -89,9 +94,9 @@ collar_z1   = 21;                       // topo do colar = apoio do flange do fu
 // hop_cham acima do topo do colar porque o flange do funil ficou mais alto --
 // e o flange subiu para caber um chanfro de 40 graus embaixo dele, senao o
 // funil precisaria de suporte na impressao.
-lug_y       = 16.0;                     // centro das orelhas em Y
-lug_top     = collar_z1 + hop_cham;     // face de apoio do flange
-lug_t       = lug_top - 15;             // espessura da orelha
+lug_y       = 19.3;                     // centro das orelhas em Y
+lug_top     = collar_z1;                // face de apoio do flange
+lug_t       = 6;                        // espessura da orelha
 
 boss_x      = 18;    // boss da calha (encaixe), comprimento em X
 boss_y      = 21;    // largura em Y

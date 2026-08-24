@@ -516,6 +516,28 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  <div class="kicker">06 — Impressão</div>
  <h2>Imprimir as peças</h2>
 
+
+ <h3>Suporte: liga em uma peça e desliga em todas as outras</h3>
+ <table>
+  <thead><tr><th>Peça</th><th>Suporte</th><th>Por quê</th></tr></thead>
+  <tbody>
+   <tr><td><code>funil.stl</code></td><td><b style="color:var(--warn)">LIGA</b></td>
+    <td>o flange é uma aba de 3,2 mm que salta 13 mm do pescoço, a 10 mm da mesa —
+    ~1100 mm² de área plana virada para baixo. O suporte sai fácil</td></tr>
+   <tr><td><code>tubo_metade_a/b.stl</code></td><td><b style="color:var(--err)">NUNCA</b></td>
+    <td>o suporte iria para <b>dentro</b> do furo de 15 mm e do socket do funil, e você
+    não tira mais</td></tr>
+   <tr><td>todas as outras</td><td>não precisa</td><td>a orientação foi escolhida para não
+    ter saliência</td></tr>
+  </tbody>
+ </table>
+ <div class="warn">As metades do tubo têm ~1380 mm² virados para baixo, mas são
+ <b>pontes entre paredes</b>, não ilhas: o teto do furo interno (é por isso que a folga da
+ rosca é 0,6 mm — para engolir a barriga que a ponte deixa) e o teto do socket do funil,
+ uma ponte plana de 26 mm. PETG faz ponte de 26 mm sem drama. Ligar suporte aí só cria um
+ problema novo: plástico preso dentro do tubo, no caminho da rosca.</div>
+ <div class="note">No Creality Print dá para ligar suporte <b>por objeto</b>: selecione só
+ o funil e marque suporte nele.</div>
  <div class="warn"><b>Imprima primeiro a peça de teste.</b>
  <code class="only-28byj">stl/motor_28byj/peca_de_teste.stl</code><code class="only-nema17">stl/motor_nema17/peca_de_teste.stl</code>
  — 10 minutos, 9 g. Ela tem quatro gabaritos: furos do motor, encaixe do eixo, socket do
@@ -533,7 +555,7 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
    <tr><td>Velocidade</td><td>60–120 mm/s (não force PETG a 300)</td></tr>
    <tr><td>Ventilação</td><td>40–60 %</td></tr>
    <tr><td>Paredes / preenchimento</td><td>3 (4 no tubo) / 20 % (30 % na rosca)</td></tr>
-   <tr><td>Suporte</td><td><b>nenhuma peça precisa</b></td></tr>
+   <tr><td>Suporte</td><td>só o <b>funil</b> precisa — nas outras, <b>desligado</b></td></tr>
   </tbody>
  </table>
 

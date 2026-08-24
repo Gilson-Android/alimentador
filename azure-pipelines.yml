@@ -112,6 +112,13 @@ jobs:
       OPENSCAD=openscad ./build.sh
     displayName: Renderiza todas as peças
 
+  - script: |
+      set -e
+      cd cad
+      chmod +x check.sh
+      OPENSCAD=openscad PYTHON=python3 ./check.sh
+    displayName: Teste de encaixe (interferencia entre pecas)
+
   - script: python3 cad/dims.py
     displayName: Relatorio das pecas (dimensoes e massa)
 

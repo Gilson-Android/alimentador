@@ -11,7 +11,9 @@ include <common.scad>
 // Deixe false se nao vai usar sensor -- furo aberto deixa escapar racao.
 sensor_holes = false;
 
-socket_d = 5.6;                       // profundidade do encaixe
+// 5.6 fazia as paredes do socket baterem 0.6mm na barriga do tubo: a calha
+// parava antes de assentar. Medido com cad/check_interferencia.scad.
+socket_d = 4.8;                       // profundidade do encaixe
 h_duct   = 26;                        // altura do duto
 off_y    = 10;                        // deslocamento lateral (inclinacao)
 sw       = 2.6;                       // parede do socket

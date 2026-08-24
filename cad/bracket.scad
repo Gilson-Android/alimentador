@@ -56,7 +56,7 @@ module brk_profile() {
         translate([tube_y - cr_out - ear_u, mast_h - 7]) square([2*(cr_out + ear_u), 7]);
     }
     // furo do tubo e corte de tudo que passa do eixo (a tampa fecha por cima)
-    translate([tube_y, mast_h]) circle(r = barrel_od/2 + fit/2);
+    translate([tube_y, mast_h]) circle(r = barrel_od/2 + 0.3 + fit/2);
     translate([tube_y - 40, mast_h]) square([80, 40]);
   }
 }

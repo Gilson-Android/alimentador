@@ -131,6 +131,12 @@ New pipeline → GitHub → *Existing YAML* → `/azure-pipelines.yml`.
 **Relatório das peças:** `python cad/dims.py` lista dimensões, volume e massa
 estimada em PETG de cada peça, com o total por kit.
 
+**Teste de encaixe:** `cad/check.sh` renderiza a interseção de cada par de peças
+na posição de montagem e mede o volume. Volume zero = as peças só se tocam
+(apoio, encaixe). Volume maior que zero = ocupam o mesmo espaço e não montam.
+Foi assim que apareceram duas colisões que passavam batido no olho: as orelhas
+do colar contra o chanfro do funil, e a calha batendo 0,6 mm na barriga do tubo.
+
 Para mudar qualquer medida, edite `cad/common.scad` e rode `cad/build.sh` —
 todos os STLs são regerados. Precisa do [OpenSCAD](https://openscad.org) instalado.
 

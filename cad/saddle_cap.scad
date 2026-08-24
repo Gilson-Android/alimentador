@@ -17,7 +17,7 @@ module cap_profile() {
             circle(r = cr_out);
             translate([-cr_out - ear_u, 0]) square([2*(cr_out + ear_u), 7]);
         }
-        circle(r = barrel_od/2 + fit/2);
+        circle(r = barrel_od/2 + 0.3 + fit/2);
         translate([-40, -40]) square([80, 40]);   // remove tudo abaixo do eixo
     }
 }

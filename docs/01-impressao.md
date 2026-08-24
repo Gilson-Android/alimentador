@@ -15,12 +15,33 @@ PLA funciona, mas evite deixar exposto ao sol e não conte com ele por anos.
 | Ventilação | 40–60 % |
 | Paredes | **3** (4 no tubo) |
 | Preenchimento | 20 % (30 % na rosca) |
-| Suporte | **NENHUMA peça precisa de suporte** |
+| Suporte | só o funil precisa (ver abaixo) |
 | Retração / “combing” | ligue “evitar cruzar contornos” para reduzir fio de PETG |
 
 Todos os STLs já saem na orientação correta de impressão. **Não gire as peças
-no fatiador** — a orientação foi escolhida para eliminar suporte e deixar as
+no fatiador** — a orientação foi escolhida para minimizar saliência e deixar as
 camadas na direção certa dos esforços.
+
+## Suporte: liga em UMA peça e desliga em todas as outras
+
+| Peça | Suporte | Por quê |
+|---|---|---|
+| `funil.stl` | **LIGA** | o flange é uma aba de 3,2 mm que salta 13 mm do pescoço, a 10 mm da mesa. São ~1100 mm² de área plana virada para baixo. Suporte fácil de tirar |
+| `tubo_metade_a/b.stl` | **NUNCA LIGA** | o suporte iria para **dentro** do furo de 15 mm e para dentro do socket do funil, e você não tira mais |
+| todas as outras | não precisa | orientação escolhida para não ter saliência |
+
+As metades do tubo têm ~1380 mm² virados para baixo, mas são **pontes entre
+paredes**, não ilhas:
+
+- o teto do furo interno (é por isso que a folga da rosca é 0,6 mm — para
+  engolir a barriga que a ponte deixa);
+- o teto do socket do funil, uma ponte plana de 26 mm.
+
+PETG faz ponte de 26 mm sem drama. Ligar suporte aí só cria um problema novo:
+plástico preso dentro do tubo, no caminho da rosca.
+
+No Creality Print dá para ligar suporte **por objeto**: selecione só o funil e
+marque suporte nele.
 
 ## Imprima PRIMEIRO a peça de teste
 

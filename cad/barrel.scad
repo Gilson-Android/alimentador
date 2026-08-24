@@ -75,10 +75,12 @@ module collar() {
     translate([collar_cx, 0, collar_z0])
         linear_extrude(collar_z1 - collar_z0)
             rrect(socket_sq + 2*collar_wall, socket_sq + 2*collar_wall, 3);
-    // orelhas laterais que recebem o flange do funil (sobem acima do colar)
+    // orelhas laterais que recebem o flange do funil. Nascem da parede
+    // externa do colar (y = 13..15.8), por isso a primeira camada da orelha
+    // ja tem material embaixo na impressao.
     for (s = [-1, 1])
-        translate([collar_cx, s * lug_y, 15])
-            rbox(14, 13, lug_top - 15, 2);
+        translate([collar_cx, s * lug_y, lug_top - lug_t])
+            rbox(14, 11, lug_t, 2);
 }
 
 module outlet_boss() {
@@ -126,7 +128,7 @@ module barrel_cuts(part) {
     // roscas M3 das orelhas do colar (flange do funil entra por cima)
     for (s = [-1, 1])
         translate([collar_cx, s * lug_y, lug_top + 0.2])
-            rotate([180, 0, 0]) cylinder(d = m3_tap, h = lug_top - 16);
+            rotate([180, 0, 0]) cylinder(d = m3_tap, h = lug_t - 0.6);
 
     // parafusos que unem as metades
     for (e = ears) ear_screw(e[0], e[1], part);
