@@ -20,6 +20,7 @@
 #include "mqtt.h"
 
 static bool     apMode      = false;
+static bool     onlineReady = false;   // ja rodou NTP + mDNS depois de conectar
 static uint32_t lostSince   = 0;
 static time_t   slotTried[MAX_SLOTS] = {0};
 
@@ -38,32 +39,27 @@ static bool timeOk() {
 }
 
 // --------------------------------------------------------------------- rede
+// Chamado sempre que o Wi-Fi conecta (no boot ou numa reconexao): liga NTP e mDNS.
+static void wifiOnConnected() {
+    Serial.printf("[wifi] ok  ip=%s  rssi=%d dBm\n",
+                  WiFi.localIP().toString().c_str(), WiFi.RSSI());
+    configTzTime(cfg.tz, DEF_NTP1, DEF_NTP2);
+    MDNS.end();
+    if (MDNS.begin(cfg.host)) {
+        MDNS.addService("http", "tcp", HTTP_PORT);
+        Serial.printf("[wifi] http://%s.local\n", cfg.host);
+    }
+    onlineReady = true;
+}
+
 static void startWifi() {
     WiFi.persistent(false);
     WiFi.mode(WIFI_STA);
     WiFi.setHostname(cfg.host);
     WiFi.setSleep(false);          // sem isso o stream MJPEG engasga
 
-    if (strlen(cfg.ssid)) {
-        Serial.printf("[wifi] conectando em \"%s\"", cfg.ssid);
-        WiFi.begin(cfg.ssid, cfg.pass);
-        uint32_t t0 = millis();
-        while (WiFi.status() != WL_CONNECTED && millis() - t0 < WIFI_TIMEOUT_MS) {
-            delay(250);
-            Serial.print('.');
-        }
-        Serial.println();
-    }
-
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.printf("[wifi] ok  ip=%s  rssi=%d dBm\n",
-                      WiFi.localIP().toString().c_str(), WiFi.RSSI());
-        configTzTime(cfg.tz, DEF_NTP1, DEF_NTP2);
-        if (MDNS.begin(cfg.host)) {
-            MDNS.addService("http", "tcp", HTTP_PORT);
-            Serial.printf("[wifi] http://%s.local\n", cfg.host);
-        }
-    } else {
+    // Nunca configurado -> sobe o modo AP so para a configuracao inicial.
+    if (!strlen(cfg.ssid)) {
         WiFi.mode(WIFI_AP);
         char ssid[32];
         snprintf(ssid, sizeof(ssid), AP_SSID_PREFIX "%04X",
@@ -72,7 +68,25 @@ static void startWifi() {
         apMode = true;
         Serial.printf("[wifi] MODO CONFIGURACAO -> rede \"%s\" senha \"%s\"\n", ssid, AP_PASSWORD);
         Serial.println(F("[wifi] abra http://192.168.4.1 e configure em Ajustes > Rede"));
+        return;
     }
+
+    // Ja configurado -> tenta a rede salva. Se falhar (ex.: roteador ainda subindo
+    // apos queda de luz), NAO vira roteador: segue tentando em segundo plano (loop)
+    // e a agenda continua rodando offline com o relogio interno.
+    Serial.printf("[wifi] conectando em \"%s\"", cfg.ssid);
+    WiFi.begin(cfg.ssid, cfg.pass);
+    uint32_t t0 = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - t0 < WIFI_TIMEOUT_MS) {
+        delay(250);
+        Serial.print('.');
+    }
+    Serial.println();
+
+    if (WiFi.status() == WL_CONNECTED)
+        wifiOnConnected();
+    else
+        Serial.println(F("[wifi] sem rede no boot; sigo tentando e a agenda roda offline"));
 }
 
 // ---------------------------------------------------------------- agenda
@@ -184,22 +198,25 @@ void loop() {
         ESP.restart();
     }
 
-    // vigia o Wi-Fi: tenta reconectar e, em ultimo caso, reinicia
+    // vigia o Wi-Fi: reconecta em segundo plano e, ao voltar, religa NTP/mDNS.
+    // Um aparelho ja configurado nunca vira roteador -- so segue tentando a rede.
     static uint32_t lastCheck = 0;
     if (!apMode && millis() - lastCheck > 15000) {
         lastCheck = millis();
-        if (WiFi.status() != WL_CONNECTED) {
+        if (WiFi.status() == WL_CONNECTED) {
+            lostSince = 0;
+            if (!onlineReady) wifiOnConnected();     // conectou agora (boot offline ou reconexao)
+        } else {
             if (!lostSince) lostSince = millis();
-            Serial.println(F("[wifi] caiu, tentando reconectar"));
+            onlineReady = false;                     // refaz NTP/mDNS quando a rede voltar
+            Serial.println(F("[wifi] sem rede, tentando reconectar"));
             WiFi.disconnect();
             WiFi.begin(cfg.ssid, cfg.pass);
-            if (millis() - lostSince > 600000UL) {   // 10 min sem rede
+            if (millis() - lostSince > 600000UL) {   // 10 min sem rede -> reinicia
                 Serial.println(F("[wifi] sem rede ha 10 min, reiniciando"));
                 delay(200);
                 ESP.restart();
             }
-        } else {
-            lostSince = 0;
         }
     }
     delay(50);

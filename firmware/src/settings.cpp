@@ -67,7 +67,8 @@ void settingsToJson(JsonObject o, bool secrets) {
     o["ssid"] = cfg.ssid;
     o["host"] = cfg.host;
     o["tz"]   = cfg.tz;
-    o["hasUiPass"]  = strlen(cfg.uiPass) > 0;
+    o["hasUiPass"]   = strlen(cfg.uiPass) > 0;
+    o["hasWifiPass"] = strlen(cfg.pass) > 0;
     o["tgEnabled"]  = strlen(cfg.tgToken) > 0;
     o["tgChat"]     = cfg.tgChat;
     o["tgNotify"]   = cfg.tgNotify;
@@ -90,6 +91,7 @@ void settingsToJson(JsonObject o, bool secrets) {
     o["mqttPrefix"]      = cfg.mqttPrefix;
     o["mqttTls"]         = cfg.mqttTls;
     o["mqttEnabled"]     = strlen(cfg.mqttHost) > 3;
+    o["mqttHasPass"]     = strlen(cfg.mqttPass) > 0;
     if (secrets) {
         o["pass"]    = cfg.pass;
         o["uiPass"]  = cfg.uiPass;

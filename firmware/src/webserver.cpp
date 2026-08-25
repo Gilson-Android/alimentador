@@ -161,9 +161,11 @@ static esp_err_t hStatus(httpd_req_t *r) {
 
 static esp_err_t hGetConfig(httpd_req_t *r) {
     REQUIRE_AUTH(r);
+    // ?secrets=1 devolve token/senhas (so pra quem ja esta autenticado, pro
+    // botao "Copiar" da interface). Sem isso, os segredos nunca saem do aparelho.
     JsonDocument d;
     JsonObject o = d.to<JsonObject>();
-    settingsToJson(o, false);
+    settingsToJson(o, qInt(r, "secrets", 0) == 1);
     return sendJson(r, d);
 }
 
@@ -242,6 +244,31 @@ static esp_err_t hReboot(httpd_req_t *r) {
     return e;
 }
 
+// varre as redes proximas (so 2,4 GHz -- e o unico radio do ESP32) pra
+// preencher o SSID na tela de configuracao sem digitar
+static esp_err_t hScan(httpd_req_t *r) {
+    REQUIRE_AUTH(r);
+    // habilita a interface STA sem derrubar o AP, so pra varrer
+    if (WiFi.getMode() == WIFI_MODE_AP) WiFi.mode(WIFI_MODE_APSTA);
+    int n = WiFi.scanNetworks();
+    JsonDocument d;
+    JsonArray a = d["nets"].to<JsonArray>();
+    for (int i = 0; i < n; i++) {
+        String s = WiFi.SSID(i);
+        if (s.isEmpty()) continue;                        // rede oculta
+        bool dup = false;                                 // mesma rede em 2 canais
+        for (JsonObject o : a)
+            if (s == o["ssid"].as<const char *>()) { dup = true; break; }
+        if (dup) continue;
+        JsonObject o = a.add<JsonObject>();
+        o["ssid"] = s;
+        o["rssi"] = WiFi.RSSI(i);
+        o["lock"] = WiFi.encryptionType(i) != WIFI_AUTH_OPEN;
+    }
+    WiFi.scanDelete();
+    return sendJson(r, d);
+}
+
 // ------------------------------------------------------------------ camera
 #if HAS_CAMERA
 static esp_err_t hSnapshot(httpd_req_t *r) {
@@ -314,6 +341,7 @@ void webStart() {
         reg(srv, "/api/jog",       HTTP_POST, hJog);
         reg(srv, "/api/log",       HTTP_GET,  hLog);
         reg(srv, "/api/reboot",    HTTP_POST, hReboot);
+        reg(srv, "/api/scan",      HTTP_GET,  hScan);
 #if HAS_CAMERA
         reg(srv, "/snapshot.jpg",  HTTP_GET,  hSnapshot);
 #endif

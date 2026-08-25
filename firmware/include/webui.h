@@ -58,6 +58,13 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
 #gate{position:fixed;inset:0;background:var(--bg);display:none;place-items:center;z-index:30}
 #gate.on{display:grid}
 .hint{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.4}
+.netitem{display:flex;justify-content:space-between;align-items:center;gap:8px;
+padding:9px 10px;border:1px solid var(--line);border-radius:8px;margin-top:6px;
+background:#0e1216;cursor:pointer;font-size:14px}
+.netitem.sel{border-color:var(--acc);background:#16241f}
+.chip{font-size:10px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;
+margin-left:6px;vertical-align:middle;color:var(--dim);font-weight:500}
+.chip.ok{color:var(--acc);border-color:var(--acc);background:#16241f}
 </style></head><body>
 
 <header><span class="dot" id="dot"></span><h1>AquaFeeder</h1>
@@ -160,7 +167,11 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
  </div>
  <div class="card">
   <label>Telegram (controle fora de casa)</label>
-  <div><label>Token do bot</label><input id="c_tgt" placeholder="deixe vazio para desligar"></div>
+  <div><label>Token do bot <span id="tgSaved" class="chip"></span></label>
+   <div class="row" style="flex-wrap:nowrap">
+    <input id="c_tgt" placeholder="deixe vazio para desligar">
+    <button class="b s" type="button" style="flex:0 0 auto" onclick="copySecret('tgToken','#c_tgt',this)">Copiar</button>
+   </div></div>
   <div style="margin-top:8px"><label>Chat ID autorizado</label><input id="c_tgc"></div>
   <div style="margin-top:8px"><label>Avisar a cada alimentação</label>
    <select id="c_tgn"><option value="0">Não</option><option value="1">Sim</option></select></div>
@@ -172,7 +183,7 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
    <div><label>Broker</label><input id="c_mqh" placeholder="vazio = desligado"></div>
    <div><label>Porta</label><input id="c_mqp" type="number" min="1" max="65535"></div>
    <div><label>Usuario</label><input id="c_mqu"></div>
-   <div><label>Senha</label><input id="c_mqw" type="password" placeholder="(nao alterar)"></div>
+   <div><label>Senha <span id="mqwSaved" class="chip"></span></label><input id="c_mqw" type="password" placeholder="(nao alterar)"></div>
    <div><label>Prefixo dos topicos</label><input id="c_mqx"></div>
    <div><label>TLS</label><select id="c_mqt"><option value="1">Sim (8883)</option><option value="0">Nao (1883)</option></select></div>
   </div>
@@ -185,12 +196,16 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
   <label>Rede e sistema</label>
   <div class="grid">
    <div><label>Wi-Fi (SSID)</label><input id="c_ssid"></div>
-   <div><label>Senha do Wi-Fi</label><input id="c_wpass" type="password" placeholder="(não alterar)"></div>
+   <div><label>Senha do Wi-Fi <span id="wpSaved" class="chip"></span></label><input id="c_wpass" type="password" placeholder="(não alterar)"></div>
    <div><label>Nome na rede</label><input id="c_host"></div>
    <div><label>Fuso (TZ POSIX)</label><input id="c_tz"></div>
-   <div><label>Senha da interface</label><input id="c_ui" type="password" placeholder="(não alterar)"></div>
+   <div><label>Senha da interface <span id="uiSaved" class="chip"></span></label><input id="c_ui" type="password" placeholder="(não alterar)"></div>
   </div>
-  <div class="hint">Fuso do Brasil: <code>&lt;-03&gt;3</code>. Trocar Wi-Fi ou nome reinicia o aparelho.</div>
+  <button class="b s" style="width:100%;margin-top:8px" onclick="scanWifi(this)">Procurar redes 2,4 GHz</button>
+  <div id="netlist"></div>
+  <div class="hint">Toque em <b>Procurar redes</b> e escolha a sua na lista (só aparecem redes de 2,4 GHz,
+  as únicas que o alimentador consegue usar) — depois é só digitar a senha.
+  Fuso do Brasil: <code>&lt;-03&gt;3</code>. Trocar Wi-Fi ou nome reinicia o aparelho.</div>
  </div>
  <div class="row">
   <button class="b p" style="flex:2" onclick="saveCfg()">Salvar ajustes</button>
@@ -214,6 +229,7 @@ font-size:13px;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;z-in
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const DOW=['D','S','T','Q','Q','S','S'];
 let streaming=false, cfgCache=null;
 
@@ -322,7 +338,30 @@ function fillCfg(c){
  $('#c_tgc').value=c.tgChat||'';        $('#c_tgn').value=c.tgNotify?1:0;
  $('#c_ssid').value=c.ssid||'';         $('#c_host').value=c.host||'';
  $('#c_tz').value=c.tz||'';
+ setSaved('#tgSaved', c.tgEnabled, '#c_tgt');
+ setSaved('#uiSaved', c.hasUiPass, '#c_ui');
+ setSaved('#wpSaved', c.hasWifiPass, '#c_wpass');
+ setSaved('#mqwSaved', c.mqttHasPass, '#c_mqw');
  renderSlots(c.slots);
+}
+// mostra "salvo" ao lado do campo -- o firmware nunca devolve o segredo em si
+function setSaved(chipSel, on, inputSel){
+ const c=$(chipSel); if(c){c.textContent=on?'✓ salvo':'vazio';c.className='chip'+(on?' ok':'')}
+ const i=inputSel&&$(inputSel); if(i&&on)i.placeholder='•••••••• salvo — deixe em branco p/ manter';
+}
+// busca o segredo (autenticado) so na hora de copiar, revela no campo e copia
+async function copySecret(key,sel,btn){
+ const el=$(sel);
+ try{
+  const c=await api('/api/config?secrets=1');
+  const v=(c[key]||'').toString();
+  if(!v){toast('Nada salvo para copiar',1);return}
+  el.type='text'; el.value=v;
+  let ok=false;
+  try{await navigator.clipboard.writeText(v);ok=true}catch(e){}
+  if(!ok){el.select();try{ok=document.execCommand('copy')}catch(e){}}
+  toast(ok?'Copiado ✓':'Revelado no campo — selecione e copie');
+ }catch(e){toast(e.message,1)}
 }
 async function saveCfg(){
  const b={stepsPerPortion:+$('#c_steps').value,stepUs:+$('#c_us').value,
@@ -343,6 +382,30 @@ async function saveCfg(){
  if($('#c_mqw').value) b.mqttPass=$('#c_mqw').value;
  try{const r=await api('/api/config',{method:'POST',body:JSON.stringify(b)});
   toast(r.reboot?'Salvo. Reiniciando...':'Ajustes salvos')}catch(e){toast(e.message,1)}
+}
+
+async function scanWifi(btn){
+ const box=$('#netlist'), old=btn?btn.textContent:'';
+ if(btn){btn.disabled=true;btn.textContent='Procurando...'}
+ box.innerHTML='<div class="dim" style="padding:8px 2px">procurando redes 2,4 GHz...</div>';
+ try{
+  const r=await api('/api/scan');
+  const nets=(r.nets||[]).sort((a,b)=>b.rssi-a.rssi);
+  box.innerHTML = nets.length ? nets.map(n=>{
+   const q=n.rssi>=-60?4:n.rssi>=-70?3:n.rssi>=-78?2:1;
+   const dots='●'.repeat(q)+'<span style="opacity:.3">'+'●'.repeat(4-q)+'</span>';
+   return `<div class="netitem" onclick="pickNet(this)" data-ssid="${esc(n.ssid)}">
+    <span>${n.lock?'🔒 ':''}${esc(n.ssid)}</span><span class="dim">${dots}</span></div>`;
+  }).join('') : '<div class="dim" style="padding:8px 2px">nenhuma rede encontrada — chegue mais perto do roteador e tente de novo</div>';
+ }catch(e){box.innerHTML='<div class="dim" style="padding:8px 2px">'+e.message+'</div>'}
+ if(btn){btn.disabled=false;btn.textContent=old}
+}
+function pickNet(el){
+ $('#c_ssid').value=el.dataset.ssid;
+ $$('#netlist .netitem').forEach(x=>x.classList.remove('sel'));
+ el.classList.add('sel');
+ $('#c_wpass').focus();
+ toast('Rede: '+el.dataset.ssid+' — agora digite a senha');
 }
 
 async function loadLog(){
