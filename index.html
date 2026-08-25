@@ -929,6 +929,12 @@ footer{border-top:1px solid var(--line);padding:28px 20px 60px;color:var(--dim2)
  nível alto. Consequência prática: <b>sem os 12 V o driver está morto</b>, mesmo com o
  ESP32 ligado e piscando.</div>
 
+ <div class="note"><b>Duas formas de alimentar o ESP32.</b> O esquema acima tira os 5 V da
+ própria fonte de 12 V com um step-down. Mais simples: deixe o ESP32 num <b>carregador USB de
+ parede</b> (5 V) e use os 12 V <b>só no driver</b> — dispensa o step-down. A única exigência é
+ <b>unir os GNDs</b>: o GND da fonte de 12 V tem que estar ligado ao GND do ESP32, senão o driver
+ não lê os sinais STEP/DIR/EN e o motor não gira. Use carregador de parede, não powerbank.</div>
+
  <div class="warn"><b>Ajuste o limite de corrente ANTES de ligar o motor.</b> Com o motor
  desconectado e os 12 V ligados, meça a tensão entre o cursor do trimpot e o GND:
  <br><code>Vref = corrente ÷ 2</code> → <b>0,25 V para 0,5 A</b> (essa é a conta do
@@ -1218,12 +1224,16 @@ esptool.py --chip esp32s3 --port COM5 --baud 921600 write_flash -z \
   <li>Não há Wi-Fi salvo, então o aparelho sobe em <b>modo configuração</b>: procure a
   rede <code>AquaFeeder-XXXX</code>, senha <code>aquafeeder</code>.</li>
   <li>Abra <b>http://192.168.4.1</b>.</li>
-  <li><i>Ajustes → Rede e sistema</i>: preencha o seu Wi-Fi, <b>defina uma senha para a
-  interface</b> e salve. O aparelho reinicia e entra na sua rede.</li>
+  <li><i>Ajustes → Rede e sistema</i>: toque em <b>Procurar redes 2,4 GHz</b> e escolha o seu
+  Wi-Fi na lista (só aparecem redes de 2,4 GHz, as únicas que o ESP32 usa), digite a senha,
+  <b>defina uma senha para a interface</b> e salve. O aparelho reinicia e entra na sua rede.</li>
   <li>Depois disso acesse por <b>http://aquafeeder.local</b> (ou pelo IP que aparece no
   monitor serial).</li>
  </ol>
  <p>Vale <b>reservar o IP</b> no roteador (DHCP estático) — assim o endereço nunca muda.</p>
+ <div class="note"><b>Depois de configurado, ele nunca mais volta ao modo AquaFeeder-XXXX.</b>
+ Se a rede cair ou faltar luz, o aparelho segue tentando reconectar em segundo plano (a agenda
+ continua rodando com o relógio interno) e reentra na sua rede sozinho quando o Wi-Fi volta.</div>
 
  <h3>Atualizar depois (OTA)</h3>
  <pre><code>pio run -e freenove_s3_cam -t upload --upload-port aquafeeder.local</code></pre>

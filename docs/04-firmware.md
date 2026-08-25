@@ -36,12 +36,19 @@ Não há Wi-Fi salvo, então o aparelho sobe em **modo configuração**:
 
 1. Procure a rede Wi-Fi **`AquaFeeder-XXXX`** e conecte com a senha `aquafeeder`.
 2. Abra **http://192.168.4.1**.
-3. Vá em *Ajustes → Rede e sistema*, preencha o Wi-Fi da sua casa, **defina uma
-   senha para a interface** e salve. O aparelho reinicia e entra na sua rede.
+3. Vá em *Ajustes → Rede e sistema*, toque em **Procurar redes 2,4 GHz** e escolha
+   o seu Wi-Fi na lista (só aparecem redes de 2,4 GHz, as únicas que o ESP32 usa),
+   digite a senha, **defina uma senha para a interface** e salve. O aparelho
+   reinicia e entra na sua rede.
 4. Depois disso, acesse por **http://aquafeeder.local** (ou pelo IP que aparece
    no monitor serial / na lista de dispositivos do seu roteador).
 
 Vale **reservar o IP** (DHCP estático) no roteador — assim o endereço nunca muda.
+
+Uma vez configurado, o aparelho **nunca mais volta ao modo `AquaFeeder-XXXX`**: se a
+rede cair ou faltar luz, ele segue tentando reconectar em segundo plano (a agenda
+continua rodando com o relógio interno) e reentra na sua rede sozinho quando o Wi-Fi
+volta.
 
 ## A interface
 

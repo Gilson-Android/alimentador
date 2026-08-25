@@ -222,6 +222,12 @@ na mesma fonte, em paralelo, com fio de 22 AWG ou mais grosso.
 5 V do ESP32. **Ajuste a saída do step-down para 5,0 V antes de ligar na placa** —
 esses módulos saem de fábrica em qualquer tensão.
 
+**Alternativa mais simples (sem step-down):** alimente o **ESP32 por um carregador
+USB de parede** (5 V) e use a fonte de 12 V **só para o driver** (VMOT). A única
+exigência é **unir os GNDs**: o GND da fonte de 12 V tem que estar ligado ao GND do
+ESP32, senão o driver não lê os sinais STEP/DIR/EN e o motor não gira. Use carregador
+de parede, não powerbank.
+
 Não use powerbank como fonte fixa: muitos desligam sozinhos quando o consumo cai
 (o alimentador fica em repouso a maior parte do tempo).
 
