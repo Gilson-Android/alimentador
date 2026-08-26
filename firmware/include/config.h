@@ -120,5 +120,5 @@
 // Vazio = sem o botao "Abrir painel" (o teclado mostra so os botoes de texto).
 // TEM que ser https -- o Telegram recusa http.
 #ifndef TG_WEBAPP_URL
-  #define TG_WEBAPP_URL ""
+  #define TG_WEBAPP_URL "https://gilson-android.github.io/alimentador/painel/"
 #endif
