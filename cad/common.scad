@@ -161,6 +161,11 @@ n17_socket_c = 0.25;   // medido na K1 Max: 0.35 saiu frouxo, 0.25 acerta
 n17_plate    = 52;     // lado do prato
 n17_plate_t  = 4.5;
 n17_socket_d = 20;     // encaixe fundo: engole eixo de ate ~24mm sem cortar
+// Rebaixo para a cabeca do parafuso que prende o eixo. A cabeca TEM que ficar
+// recolhida dentro do cubo (Ø14.6) senao raspa no furo do tubo (Ø15.2, folga
+// radial de so 0.3mm). Medido no parafuso usado: cabeca Ø4.7 x 1.9mm.
+n17_screw_head_d = 4.7;
+n17_screw_head_h = 1.9;
 
 // ---------------------------------------------------------------------
 //  Bracadeira do aquario
@@ -227,6 +232,22 @@ module dshaft(len, extra = 0.15) {
         translate([0, 0, len/2])
             cube([m_shaft_d + 2*extra + 2, m_shaft_flat + 2*extra, len], center = true);
     }
+}
+
+// eixo do NEMA17 (achatado unico / D). c = folga radial do encaixe.
+// Cresce o perfil "D" do eixo por 'c' em toda a volta: mantem a mesma folga de
+// deslize ja calibrada no diametro E cria a face plana que abraca o achatado do
+// eixo -- e o achatado que pega o torque, o parafuso vira so trava axial.
+// Achatado na direcao +X (mesmo lado do parafuso radial em X do cubo).
+module n17_dsocket(len, c = n17_socket_c) {
+    linear_extrude(height = len)
+        offset(r = c)
+            difference() {
+                circle(d = n17_shaft_d, $fn = 64);
+                // remove a calota alem do plano do achatado (a n17_flat do lado oposto)
+                translate([n17_flat - n17_shaft_d/2, -n17_shaft_d])
+                    square([n17_shaft_d, 2*n17_shaft_d]);
+            }
 }
 
 // setor de circulo (pizza) com angulo ang, raio r

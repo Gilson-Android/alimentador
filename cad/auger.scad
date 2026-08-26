@@ -24,6 +24,14 @@ module auger_flight(len) {
         }
 }
 
+// furo do parafuso de fixacao do eixo + rebaixo p/ a cabeca na boca externa.
+// Desenhado ao longo de +Z: a boca fica na superficie do cubo (raio hub_d/2).
+module shaft_screw() {
+    cylinder(d = m3_tap, h = hub_d);                          // furo rosqueado
+    translate([0, 0, hub_d/2 - n17_screw_head_h])
+        cylinder(d = n17_screw_head_d, h = hub_d);            // rebaixo da cabeca
+}
+
 module auger() {
     total = hub_len + auger_len + stub_len;
     difference() {
@@ -36,13 +44,16 @@ module auger() {
         }
         // encaixe do eixo do motor
         if (motor_type == "NEMA17") {
-            // Encaixe redondo com folga de deslize (ver n17_socket_c).
+            // Encaixe em "D": acompanha o achatado do eixo com folga de deslize
+            // (ver n17_socket_c). A face plana pega o torque -- assim a rosca
+            // encaixa firme e nao depende do parafuso para nao patinar.
             translate([0, 0, -eps])
-                cylinder(d = n17_shaft_d + 2*n17_socket_c + fit, h = n17_socket_d + eps);
-            // DOIS parafusos M3 radiais a 90 graus: use o que cair em cima do
-            // achatado do eixo (ou os dois). E o achatado que pega o torque.
-            translate([0, 0, 7])  rotate([0, 90, 0]) cylinder(d = m3_tap, h = hub_d);
-            translate([0, 0, 12]) rotate([90, 0, 0]) cylinder(d = m3_tap, h = hub_d);
+                n17_dsocket(n17_socket_d + eps, n17_socket_c + fit/2);
+            // DOIS parafusos M3 radiais a 90 graus: o em X cai sobre o achatado
+            // (trava axial + reforca o aperto); o em Y e opcional. O torque quem
+            // segura e o achatado do encaixe, nao os parafusos.
+            translate([0, 0, 7])  rotate([0, 90, 0]) shaft_screw();
+            translate([0, 0, 12]) rotate([90, 0, 0]) shaft_screw();
         } else {
             translate([0, 0, -eps]) dshaft(socket_depth + eps, 0.15 + fit/2);
         }
