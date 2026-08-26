@@ -17,7 +17,7 @@ module auger_flight(len) {
             intersection() {
                 difference() {
                     circle(d = auger_od);
-                    circle(d = auger_core - 1.5);
+                    circle(d = auger_core - 3);   // encrava a aleta ~1.5mm no nucleo (mais forte)
                 }
                 pie(auger_od, ang);
             }

@@ -30,7 +30,9 @@ module rosca() {
     translate([0.6, 0, 0]) rotate([0, 90, 0]) auger();
 }
 module calha() {
-    translate([outlet_x0 + outlet_len/2, 0, -41.4]) chute();
+    // topo da calha (h_duct+socket_d = 30.8) encosta na barriga do tubo (-barrel_od/2).
+    // Paramétrico p/ acompanhar o tubo se auger_od/barrel_od mudarem.
+    translate([outlet_x0 + outlet_len/2, 0, -barrel_od/2 - 30.8]) chute();
 }
 // posicao da bracadeira depende do motor (ver zonas livres em common.scad)
 brk_x = (motor_type == "NEMA17") ? 24 : 11;

@@ -38,7 +38,7 @@ module aquafeeder() {
     color("#4a6fa5") translate([0,  e*26, 0]) barrel_half("A");
     color("#3d5c8a") translate([0, -e*26, 0]) barrel_half("B");
     color("#d8a13a") translate([0.6 - e*46, 0, 0]) rotate([0, 90, 0]) auger();
-    color("#8fbf6a") translate([outlet_x0 + outlet_len/2, 0, -41.4 - e*34]) chute();
+    color("#8fbf6a") translate([outlet_x0 + outlet_len/2, 0, -barrel_od/2 - 30.8 - e*34]) chute();
 
     // ---- funil -----------------------------------------------------
     if (SHOW_HOPPER) {

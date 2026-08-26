@@ -24,16 +24,19 @@ motor_type = "28BYJ";
 // ---------------------------------------------------------------------
 //  Rosca sem-fim (auger)
 // ---------------------------------------------------------------------
-auger_od     = 14.0;   // diametro externo da helice
-auger_core   = 6.0;    // diametro do nucleo
-auger_pitch  = 9.0;    // passo da helice (avanco por volta)
-flight_t     = 1.6;    // espessura vertical da aleta
-hub_d        = 14.6;   // cubo dianteiro (funciona como mancal no tubo)
+// Dimensionada para bolinha de ~6mm: canal (auger_od-auger_core)/2 = 7.5mm, com
+// folga pro grao passar sem entupir. Nucleo grosso (9mm) porque o de 6mm quebrava
+// na torcao (impressa em pe, camadas fracas): area ~ diametro^3, 9/6 => ~3.4x mais forte.
+auger_od     = 24.0;   // diametro externo da helice
+auger_core   = 9.0;    // diametro do nucleo (era 6.0 e quebrava)
+auger_pitch  = 16.0;   // passo da helice (avanco por volta; folgado p/ grao de 6mm)
+flight_t     = 2.4;    // espessura vertical da aleta (era 1.6; mais grossa = mais forte)
+hub_d        = 24.6;   // cubo dianteiro = mancal no tubo (auger_od + 0.6)
 // O cubo tem que ser fundo o suficiente para engolir o eixo do motor.
 // O NEMA 17 tem eixo liso de ~20-25mm, por isso o cubo dele e maior --
 // e por isso a janela de entrada comeca mais para tras (ver abaixo).
 hub_len      = (motor_type == "NEMA17") ? 22.0 : 11.0;
-stub_d       = 5.8;    // ponta traseira (segundo mancal)
+stub_d       = 8.8;    // ponta traseira (segundo mancal; acompanha o nucleo maior)
 stub_len     = 3.2;
 // Folga radial helice <-> tubo. Cada metade do tubo imprime com a face plana
 // na mesa, entao o "teto" do furo (que na montagem fica na LATERAL, na altura
