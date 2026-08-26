@@ -77,9 +77,14 @@
   #define MICROSTEPS             8
   #define STEPS_PER_REV          (200 * MICROSTEPS)   // 1600
   #define DEF_STEPS_PER_PORTION  (STEPS_PER_REV / 4)  // 400 = 1/4 volta ~= 0,23 ml
-  #define DEF_STEP_US            900    // us entre passos
+  #define DEF_STEP_US            900    // us entre passos (velocidade de cruzeiro)
   #define ANTIJAM_STEPS          36     // re antes de dispensar (quebra ponte)
   #define UNJAM_STEPS            160    // re maior quando detecta entupimento
+  // Rampa de aceleracao: parte devagar (RAMP_START_US) e acelera ate cfg.stepUs
+  // ao longo de RAMP_STEPS passos (e desacelera no fim). Vence a inercia sem
+  // travar/patinar no arranque. Se ainda travar, aumente RAMP_START_US.
+  #define RAMP_STEPS             200    // passos de acel/desacel
+  #define RAMP_START_US          3000   // us/passo no inicio (quanto maior, mais suave)
 #else
   // 28BYJ-48 em meio-passo: 4096 passos por volta do eixo de saida
   #define STEPS_PER_REV          4096

@@ -124,12 +124,28 @@ static void runSteps(int32_t steps) {
     digitalWrite(PIN_DIR, dir > 0 ? HIGH : LOW);
     driverEnable(true);
     delayMicroseconds(200);              // driver acordar + DIR estabilizar
+
     uint32_t n = abs(steps);
+    // Perfil trapezoidal: parte lento (start), acelera ate a velocidade de
+    // cruzeiro (cfg.stepUs) em 'ramp' passos, e desacelera no fim. Isso vence
+    // a inercia do NEMA17 sem travar no arranque.
+    uint32_t cruise = cfg.stepUs;
+    uint32_t start  = (RAMP_START_US > cruise) ? RAMP_START_US : cruise;
+    uint32_t ramp   = RAMP_STEPS;
+    if (ramp > n / 2) ramp = n / 2;     // move curto: rampa cabe na metade
+
     for (uint32_t i = 0; i < n; i++) {
+        uint32_t per = cruise;          // periodo (us) deste passo
+        if (ramp > 0) {
+            if (i < ramp)                                  // acelerando
+                per = start - (uint32_t)((uint64_t)(start - cruise) * i / ramp);
+            else if (i >= n - ramp)                        // desacelerando
+                per = start - (uint32_t)((uint64_t)(start - cruise) * (n - 1 - i) / ramp);
+        }
         digitalWrite(PIN_STEP, HIGH);
-        delayMicroseconds(4);            // pulso minimo (A4988 pede 1us)
+        delayMicroseconds(4);            // pulso minimo (DRV8825 pede >=1.9us)
         digitalWrite(PIN_STEP, LOW);
-        stepDelay(cfg.stepUs > 6 ? cfg.stepUs - 4 : 2);
+        stepDelay(per > 6 ? per - 4 : 2);
         if ((i & 0x3F) == 0x3F) vTaskDelay(1);
     }
     driverEnable(false);   // solta o motor: nao esquenta nem consome parado
