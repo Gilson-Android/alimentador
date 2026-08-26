@@ -68,7 +68,7 @@ border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;line-heig
 </div>
 
 <div class="hint">As respostas (status, foto, agenda) chegam como mensagem no chat.
-O painel fecha sozinho ao enviar um comando.</div>
+O painel fecha sozinho ao enviar um comando. <span style="opacity:.5">v2</span></div>
 
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
@@ -77,14 +77,20 @@ let qty = 1;
 function bump(d){ qty = Math.min(10, Math.max(1, qty + d)); document.getElementById('qty').textContent = qty; }
 
 function send(cmd){
-  if (!tg || typeof tg.sendData !== 'function' || !tg.initData) {
+  // Web App aberto por botao de teclado tem initData vazio -- NAO da pra usar
+  // isso como trava. Tentamos enviar; se der erro (aberto no navegador), avisa.
+  if (!tg || typeof tg.sendData !== 'function') {
     document.getElementById('warn').style.display = 'block';
     window.scrollTo(0, 0);
     return;
   }
   try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-  try { tg.sendData(cmd); } catch(e){ alert('Nao consegui enviar: ' + e.message); }
-  // ao enviar, o Telegram fecha o painel automaticamente
+  try {
+    tg.sendData(cmd);   // manda pro bot; o Telegram fecha o painel em seguida
+  } catch(e){
+    document.getElementById('warn').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
 }
 function feed(){ send('/alimentar ' + qty); }
 
@@ -95,7 +101,10 @@ if (tg) {
     const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (u && u.first_name) document.getElementById('sub').textContent = 'olá, ' + u.first_name;
   } catch(e){}
-  if (!tg.initData) document.getElementById('warn').style.display = 'block';
+  // Fora do Telegram (aberto no navegador) o SDK reporta platform 'unknown'.
+  // Dentro do Telegram (inclusive via botao de teclado) vem ios/android/tdesktop.
+  if (!tg.platform || tg.platform === 'unknown')
+    document.getElementById('warn').style.display = 'block';
 } else {
   document.getElementById('warn').style.display = 'block';
 }
