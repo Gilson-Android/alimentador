@@ -321,6 +321,7 @@ const char *feedSrcName(uint8_t src) {
         case SRC_SCHED:    return "agenda";
         case SRC_TELEGRAM: return "telegram";
         case SRC_BUTTON:   return "botao";
+        case SRC_ALEXA:    return "alexa";
         default:           return "jog";
     }
 }

@@ -21,6 +21,7 @@ void settingsDefaults() {
     cfg.catchUpMin      = DEF_CATCHUP_MIN;
     cfg.sensorEnabled   = false;
     cfg.tgNotify        = true;
+    cfg.alexaPortions   = 1;
     cfg.camVflip        = false;
     cfg.camHmirror      = false;
     cfg.camSize         = 2;      // SVGA 800x600
@@ -72,6 +73,8 @@ void settingsToJson(JsonObject o, bool secrets) {
     o["tgEnabled"]  = strlen(cfg.tgToken) > 0;
     o["tgChat"]     = cfg.tgChat;
     o["tgNotify"]   = cfg.tgNotify;
+    o["alexaEnabled"]  = strlen(cfg.alexaDevId) > 10;
+    o["alexaPortions"] = cfg.alexaPortions;
     o["stepsPerPortion"] = cfg.stepsPerPortion;
     o["stepUs"]          = cfg.stepUs;
     o["reverse"]         = cfg.reverse;
@@ -97,6 +100,9 @@ void settingsToJson(JsonObject o, bool secrets) {
         o["uiPass"]  = cfg.uiPass;
         o["tgToken"]   = cfg.tgToken;
         o["mqttPass"] = cfg.mqttPass;
+        o["alexaAppKey"] = cfg.alexaAppKey;
+        o["alexaSecret"] = cfg.alexaSecret;
+        o["alexaDevId"]  = cfg.alexaDevId;
     }
     JsonArray arr = o["slots"].to<JsonArray>();
     for (int i = 0; i < MAX_SLOTS; i++) {
@@ -122,6 +128,9 @@ bool settingsFromJson(JsonObjectConst o) {
     copyIf(o, "mqttPrefix", cfg.mqttPrefix, sizeof(cfg.mqttPrefix));
     copyIf(o, "tgToken", cfg.tgToken, sizeof(cfg.tgToken));
     copyIf(o, "tgChat",  cfg.tgChat,  sizeof(cfg.tgChat));
+    copyIf(o, "alexaAppKey", cfg.alexaAppKey, sizeof(cfg.alexaAppKey));
+    copyIf(o, "alexaSecret", cfg.alexaSecret, sizeof(cfg.alexaSecret));
+    copyIf(o, "alexaDevId",  cfg.alexaDevId,  sizeof(cfg.alexaDevId));
 
     if (o["tgNotify"].is<bool>())      cfg.tgNotify      = o["tgNotify"];
     if (o["reverse"].is<bool>())       cfg.reverse       = o["reverse"];
@@ -132,6 +141,7 @@ bool settingsFromJson(JsonObjectConst o) {
     if (o["mqttPort"].is<uint16_t>())  cfg.mqttPort      = o["mqttPort"];
     if (o["camSize"].is<uint8_t>())    cfg.camSize       = constrain((int)o["camSize"], 0, 3);
     if (o["camQuality"].is<uint8_t>()) cfg.camQuality    = constrain((int)o["camQuality"], 10, 30);
+    if (o["alexaPortions"].is<uint8_t>()) cfg.alexaPortions = constrain((int)o["alexaPortions"], 1, 20);
 
     if (o["stepsPerPortion"].is<uint16_t>())
         cfg.stepsPerPortion = constrain((int)o["stepsPerPortion"], 40, 20000);

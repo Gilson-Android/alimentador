@@ -18,6 +18,7 @@
 #include "webserver.h"
 #include "telegram.h"
 #include "mqtt.h"
+#include "alexa.h"
 
 static bool     apMode      = false;
 static bool     onlineReady = false;   // ja rodou NTP + mDNS depois de conectar
@@ -172,6 +173,7 @@ void setup() {
     webStart();
     tgBegin();
     mqttBegin();
+    alexaBegin();
 
     ArduinoOTA.setHostname(cfg.host);
     if (strlen(cfg.uiPass)) ArduinoOTA.setPassword(cfg.uiPass);

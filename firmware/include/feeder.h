@@ -10,7 +10,8 @@ enum FeedSrc : uint8_t {
     SRC_SCHED,
     SRC_TELEGRAM,
     SRC_BUTTON,
-    SRC_JOG
+    SRC_JOG,
+    SRC_ALEXA
 };
 
 struct FeedEntry {

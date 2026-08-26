@@ -36,6 +36,13 @@ struct Settings {
     char     tgToken[64];       // token do bot do Telegram (opcional)
     char     tgChat[24];        // chat id autorizado
     bool     tgNotify;          // avisar a cada alimentacao
+
+    // Alexa via Sinric Pro (nuvem gratuita). O ESP32 conecta para fora, como
+    // no Telegram. Vazio = Alexa desligada. Veja alexa.h para o passo a passo.
+    char     alexaAppKey[40];   // Sinric Pro "App Key"    (UUID, 36 chars)
+    char     alexaSecret[80];   // Sinric Pro "App Secret" (73 chars)
+    char     alexaDevId[40];    // ID do dispositivo criado no painel do Sinric
+    uint8_t  alexaPortions;     // porcoes por "alimentar agora" (padrao 1)
     uint16_t stepsPerPortion;
     uint16_t stepUs;
     bool     reverse;           // inverte o sentido de giro

@@ -178,6 +178,29 @@ margin-left:6px;vertical-align:middle;color:var(--dim);font-weight:500}
   <div class="hint">Comandos: /alimentar [n] &middot; /foto &middot; /status &middot; /agenda</div>
  </div>
  <div class="card">
+  <label>Alexa (Sinric Pro)</label>
+  <div><label>App Key <span id="alkSaved" class="chip"></span></label>
+   <div class="row" style="flex-wrap:nowrap">
+    <input id="c_alk" placeholder="deixe vazio para desligar">
+    <button class="b s" type="button" style="flex:0 0 auto" onclick="copySecret('alexaAppKey','#c_alk',this)">Copiar</button>
+   </div></div>
+  <div style="margin-top:8px"><label>App Secret <span id="alsSaved" class="chip"></span></label>
+   <div class="row" style="flex-wrap:nowrap">
+    <input id="c_als" type="password" placeholder="(não alterar)">
+    <button class="b s" type="button" style="flex:0 0 auto" onclick="copySecret('alexaSecret','#c_als',this)">Copiar</button>
+   </div></div>
+  <div style="margin-top:8px"><label>Device ID <span id="aldSaved" class="chip"></span></label>
+   <div class="row" style="flex-wrap:nowrap">
+    <input id="c_ald" placeholder="ID do dispositivo no Sinric">
+    <button class="b s" type="button" style="flex:0 0 auto" onclick="copySecret('alexaDevId','#c_ald',this)">Copiar</button>
+   </div></div>
+  <div style="margin-top:8px"><label>Porções por comando</label>
+   <input id="c_alp" type="number" min="1" max="20"></div>
+  <div class="hint">Crie um device tipo <b>Switch</b> em <code>portal.sinric.pro</code> e cole
+  as 3 chaves. No app Alexa, vincule a skill <b>Sinric Pro</b> e crie uma <b>Rotina</b>:
+  ao dizer <b>"alimentar agora"</b> → Ligar o alimentador.</div>
+ </div>
+ <div class="card">
   <label>MQTT (comando pela nuvem)</label>
   <div class="grid">
    <div><label>Broker</label><input id="c_mqh" placeholder="vazio = desligado"></div>
@@ -336,9 +359,13 @@ function fillCfg(c){
  $('#c_mqu').value=c.mqttUser||''; $('#c_mqx').value=c.mqttPrefix||'aquafeeder';
  $('#c_mqt').value=c.mqttTls?1:0;
  $('#c_tgc').value=c.tgChat||'';        $('#c_tgn').value=c.tgNotify?1:0;
+ $('#c_alp').value=c.alexaPortions||1;
  $('#c_ssid').value=c.ssid||'';         $('#c_host').value=c.host||'';
  $('#c_tz').value=c.tz||'';
  setSaved('#tgSaved', c.tgEnabled, '#c_tgt');
+ setSaved('#alkSaved', c.alexaEnabled, '#c_alk');
+ setSaved('#alsSaved', c.alexaEnabled, '#c_als');
+ setSaved('#aldSaved', c.alexaEnabled, '#c_ald');
  setSaved('#uiSaved', c.hasUiPass, '#c_ui');
  setSaved('#wpSaved', c.hasWifiPass, '#c_wpass');
  setSaved('#mqwSaved', c.mqttHasPass, '#c_mqw');
@@ -375,8 +402,12 @@ async function saveCfg(){
   mqttUser:$('#c_mqu').value,mqttPrefix:$('#c_mqx').value,
   mqttTls:$('#c_mqt').value=='1',
   tgChat:$('#c_tgc').value,tgNotify:$('#c_tgn').value=='1',
+  alexaPortions:+$('#c_alp').value,
   ssid:$('#c_ssid').value,host:$('#c_host').value,tz:$('#c_tz').value};
  if($('#c_tgt').value) b.tgToken=$('#c_tgt').value;
+ if($('#c_alk').value) b.alexaAppKey=$('#c_alk').value;
+ if($('#c_als').value) b.alexaSecret=$('#c_als').value;
+ if($('#c_ald').value) b.alexaDevId=$('#c_ald').value;
  if($('#c_wpass').value) b.pass=$('#c_wpass').value;
  if($('#c_ui').value) b.uiPass=$('#c_ui').value;
  if($('#c_mqw').value) b.mqttPass=$('#c_mqw').value;
