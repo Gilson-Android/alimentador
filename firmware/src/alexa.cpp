@@ -40,6 +40,7 @@ static void tarefa(void *) {
 
     SinricPro.onConnected([]()    { Serial.println(F("[alexa] conectado ao Sinric Pro")); });
     SinricPro.onDisconnected([]() { Serial.println(F("[alexa] desconectado do Sinric Pro")); });
+    Serial.printf("[alexa] conectando (device %s)\n", cfg.alexaDevId);
     SinricPro.begin(cfg.alexaAppKey, cfg.alexaSecret);
 
     for (;;) {

@@ -178,6 +178,11 @@ static esp_err_t hPostConfig(httpd_req_t *r) {
     strlcpy(oldSsid, cfg.ssid, sizeof(oldSsid));
     strlcpy(oldHost, cfg.host, sizeof(oldHost));
     bool wifiPass = d["pass"].is<const char *>();
+    // As tasks de Telegram/MQTT/Alexa so leem suas chaves no boot. Se o usuario
+    // acabou de colar uma chave da Alexa, reinicia para a conexao subir na hora.
+    bool alexaKeys = d["alexaAppKey"].is<const char *>() ||
+                     d["alexaSecret"].is<const char *>() ||
+                     d["alexaDevId"].is<const char *>();
 
     settingsFromJson(d.as<JsonObjectConst>());
     settingsSave();
@@ -185,7 +190,8 @@ static esp_err_t hPostConfig(httpd_req_t *r) {
     setenv("TZ", cfg.tz, 1);
     tzset();
 
-    bool needReboot = wifiPass || strcmp(oldSsid, cfg.ssid) != 0 || strcmp(oldHost, cfg.host) != 0;
+    bool needReboot = wifiPass || alexaKeys ||
+                      strcmp(oldSsid, cfg.ssid) != 0 || strcmp(oldHost, cfg.host) != 0;
     JsonDocument ok;
     ok["ok"] = true;
     ok["reboot"] = needReboot;
