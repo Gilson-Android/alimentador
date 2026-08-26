@@ -108,3 +108,12 @@
 #define DEF_TZ          "<-03>3"       // Brasil (sem horario de verao)
 #define DEF_NTP1        "pool.ntp.org"
 #define DEF_NTP2        "time.google.com"
+
+// ----------------------------------------------- painel (Telegram Mini App)
+// Cole aqui a URL HTTPS onde voce hospedou a pasta painel/ (GitHub Pages,
+// Netlify, Cloudflare Pages...). Ex.: "https://usuario.github.io/Alimentador/painel/"
+// Vazio = sem o botao "Abrir painel" (o teclado mostra so os botoes de texto).
+// TEM que ser https -- o Telegram recusa http.
+#ifndef TG_WEBAPP_URL
+  #define TG_WEBAPP_URL ""
+#endif

@@ -77,6 +77,39 @@ static bool tgSend(const String &text) {
     return tgPostJson("sendMessage", body);
 }
 
+// Envia uma mensagem JUNTO com o teclado de botoes. O Telegram fixa esse
+// teclado na conversa (is_persistent) ate ser trocado -- entao basta mandar
+// uma vez (no /start ou /menu) para os botoes ficarem sempre disponiveis.
+// Tocar num botao envia o rotulo como texto normal, que handleCommand traduz.
+static bool tgSendKb(const String &text) {
+    if (!strlen(cfg.tgChat)) return false;
+    JsonDocument d;
+    d["chat_id"] = cfg.tgChat;
+    d["text"]    = text;
+    JsonObject rm = d["reply_markup"].to<JsonObject>();
+    rm["resize_keyboard"] = true;
+    rm["is_persistent"]   = true;
+    JsonArray kb = rm["keyboard"].to<JsonArray>();
+    // Botao que abre o painel (Mini App). So aparece se a URL foi definida em
+    // config.h. Ao tocar num comando no painel, ele volta para o bot via
+    // web_app_data (tratado em pollOnce) -- sem broker, tudo pelo Telegram.
+    if (strlen(TG_WEBAPP_URL) > 0) {
+        JsonArray r0 = kb.add<JsonArray>();
+        JsonObject b = r0.add<JsonObject>();
+        b["text"] = "🐟 Abrir painel";
+        b["web_app"]["url"] = TG_WEBAPP_URL;
+    }
+    JsonArray r1 = kb.add<JsonArray>();
+    r1.add("🐟 Alimentar"); r1.add("🐟 Alimentar 2x");
+    JsonArray r2 = kb.add<JsonArray>();
+    r2.add("📷 Foto"); r2.add("📊 Status");
+    JsonArray r3 = kb.add<JsonArray>();
+    r3.add("📅 Agenda");
+    String body;
+    serializeJson(d, body);
+    return tgPostJson("sendMessage", body);
+}
+
 // ------------------------------------------------------------------- foto
 #if HAS_CAMERA
 static bool tgSendPhoto(const String &caption) {
@@ -199,6 +232,21 @@ static void handleCommand(const String &chat, String text) {
 
     text.trim();
     text.toLowerCase();
+
+    // Os botoes do teclado mandam um rotulo amigavel (ex.: "🐟 Alimentar 2x").
+    // Se nao for um /comando digitado, traduz o rotulo para o comando.
+    if (!text.startsWith("/")) {
+        if (text.indexOf("alimentar") >= 0) {
+            String num;
+            for (unsigned int i = 0; i < text.length(); i++)
+                if (isDigit(text[i])) num += text[i];
+            text = num.length() ? ("/alimentar " + num) : "/alimentar";
+        } else if (text.indexOf("foto")   >= 0) text = "/foto";
+        else if (text.indexOf("status")   >= 0) text = "/status";
+        else if (text.indexOf("agenda")   >= 0) text = "/agenda";
+        else if (text.indexOf("menu")     >= 0) text = "/menu";
+    }
+
     int sp = text.indexOf(' ');
     String cmd = sp > 0 ? text.substring(0, sp) : text;
     String arg = sp > 0 ? text.substring(sp + 1) : "";
@@ -221,11 +269,15 @@ static void handleCommand(const String &chat, String text) {
 #endif
     } else if (cmd == "/status") {
         tgSend(statusText());
+    } else if (cmd == "/jog") {
+        int32_t s = arg.length() ? arg.toInt() : (STEPS_PER_REV / 4);
+        feederJog(s);
+        tgSend(String("Movendo a rosca (") + s + " passos)...");
     } else if (cmd == "/agenda") {
         tgSend(agendaText());
-    } else if (cmd == "/start" || cmd == "/help" || cmd == "/ajuda") {
-        tgSend("Comandos:\n/alimentar [n] - solta n porções\n/foto - foto do aquário\n"
-               "/status - situação\n/agenda - horários programados");
+    } else if (cmd == "/start" || cmd == "/help" || cmd == "/ajuda" || cmd == "/menu") {
+        tgSendKb("🐠 AquaFeeder\nToque nos botões abaixo — ou use os comandos:\n"
+                 "/alimentar [n] · /foto · /status · /agenda");
     }
 }
 
@@ -235,6 +287,7 @@ static void pollOnce() {
     filter["result"][0]["update_id"] = true;
     filter["result"][0]["message"]["text"] = true;
     filter["result"][0]["message"]["chat"]["id"] = true;
+    filter["result"][0]["message"]["web_app_data"]["data"] = true;   // painel (Mini App)
 
     JsonDocument body;
     body["timeout"] = drained ? 20 : 0;
@@ -257,13 +310,16 @@ static void pollOnce() {
         if (!drained) continue;                 // descarta o backlog do boot
         JsonObjectConst msg = up["message"];
         if (msg.isNull()) continue;
+        // Comando pode vir como texto (digitado/botao) ou como web_app_data (painel)
+        const char *wad = msg["web_app_data"]["data"] | "";
         const char *txt = msg["text"] | "";
+        const char *payload = wad[0] ? wad : txt;
         int64_t chatId  = msg["chat"]["id"] | 0;
-        if (!txt[0] || chatId == 0) continue;
+        if (!payload[0] || chatId == 0) continue;
         char chatStr[24];
         snprintf(chatStr, sizeof(chatStr), "%lld", (long long)chatId);
-        Serial.printf("[tg] %s: %s\n", chatStr, txt);
-        handleCommand(String(chatStr), String(txt));
+        Serial.printf("[tg] %s: %s%s\n", chatStr, payload, wad[0] ? " (painel)" : "");
+        handleCommand(String(chatStr), String(payload));
     }
     if (!drained) {
         drained = true;

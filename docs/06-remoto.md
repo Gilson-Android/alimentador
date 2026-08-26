@@ -20,15 +20,52 @@ o Telegram. Funciona de qualquer lugar do mundo, no celular que você já usa.
 Pronto. Só esse chat id consegue dar comandos; qualquer outra pessoa que
 encontre o bot é ignorada.
 
+### Botões (o "app" no celular)
+
+Mande **`/start`** (ou `/menu`) para o seu bot uma vez. Ele fixa um teclado de
+botões na conversa — `🐟 Alimentar`, `🐟 Alimentar 2x`, `📷 Foto`, `📊 Status`,
+`📅 Agenda` — que fica sempre disponível. A partir daí é só tocar, sem digitar
+nada. É a forma mais simples de ter um "app" no celular: o app é o próprio
+Telegram, funciona de qualquer lugar e não exige hospedar nem configurar nada.
+
 ### Comandos
+
+Os botões apenas disparam estes comandos; você também pode digitá-los:
 
 | Comando | O que faz |
 |---|---|
+| `/menu` | mostra os botões |
 | `/alimentar` | 1 porção |
 | `/alimentar 2` | 2 porções |
 | `/foto` | tira e envia uma foto do aquário |
 | `/status` | porções do dia, última refeição, sinal do Wi-Fi |
+| `/jog [passos]` | gira a rosca (+ avança, − recua) para desentupir/reencher |
 | `/agenda` | lista os horários programados |
+
+### Painel bonito (Telegram Mini App) — opcional
+
+Se quiser uma interface gráfica no lugar dos botões de texto, o projeto traz um
+**painel** (pasta `painel/`) que abre DENTRO do Telegram: stepper de porções, botão
+grande de alimentar, e atalhos de foto/status/agenda/manutenção. Continua tudo pelo
+Telegram — sem broker, sem MQTT, sem nada rodando em servidor.
+
+Como o painel manda os comandos de volta pro bot (via `web_app_data`), as respostas
+(status, foto, agenda) chegam como mensagem no chat, e o painel fecha ao enviar.
+
+**Para ligar (uma vez):**
+
+1. **Hospede a pasta `painel/`** num HTTPS. Seu repositório já está no GitHub, então
+   o mais simples é o **GitHub Pages**: em *Settings → Pages*, escolha a branch `main`
+   e pasta `/ (root)`. A URL fica tipo
+   `https://gilson-android.github.io/alimentador/painel/`.
+   (Alternativas: arrastar a pasta no **Netlify Drop** ou **Cloudflare Pages**.)
+2. **Cole a URL** em `firmware/include/config.h`, na linha
+   `#define TG_WEBAPP_URL ""` → ponha a sua URL https entre as aspas.
+3. **Recompile e grave** o firmware (`pio run -e SEU_ENV -t upload`).
+4. Mande **`/menu`** pro bot: agora aparece o botão **🐟 Abrir painel**.
+
+Deixando `TG_WEBAPP_URL` vazio, o painel some e ficam só os botões de texto — os dois
+convivem numa boa. O Telegram exige **https**; `http` ele recusa.
 
 Com *Avisar a cada alimentação* ligado, você recebe uma mensagem a cada
 refeição (inclusive as da agenda) — e um alerta se o sensor de grãos não
