@@ -107,7 +107,18 @@ static bool tgSendKb(const String &text) {
     r3.add("📅 Agenda");
     String body;
     serializeJson(d, body);
-    return tgPostJson("sendMessage", body);
+
+    // Le a resposta da API: se o Telegram recusar o teclado (ex.: botao web_app
+    // invalido), a mensagem some sem erro. Aqui logamos o motivo exato.
+    JsonDocument resp, filter;
+    filter["ok"] = true;
+    filter["description"] = true;
+    bool http = tgPostJson("sendMessage", body, &resp, &filter);
+    bool ok   = resp["ok"] | false;
+    if (!ok)
+        Serial.printf("[tg] teclado recusado: %s\n",
+                      (const char *)(resp["description"] | "(sem resposta)"));
+    return http && ok;
 }
 
 // ------------------------------------------------------------------- foto
