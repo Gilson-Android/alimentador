@@ -135,9 +135,12 @@ margin-left:6px;vertical-align:middle;color:var(--dim);font-weight:500}
    <div><label>µs por passo</label><input id="c_us" type="number" min="1000" max="8000"></div>
    <div><label>Inverter sentido</label><select id="c_rev"><option value="0">Não</option><option value="1">Sim</option></select></div>
    <div><label>Sensor de grãos</label><select id="c_sens"><option value="0">Desligado</option><option value="1">Ligado</option></select></div>
+   <div><label>Destrava (anti-entupimento)</label><select id="c_aj"><option value="0">Desligado</option><option value="1">Ligado</option></select></div>
+   <div><label>Ciclos de vibração</label><input id="c_shk" type="number" min="0" max="20"></div>
   </div>
   <div class="hint">Meia volta = 2048 passos. Se a ração sair para o lado errado,
-  inverta o sentido. Mudar o sensor exige reiniciar.</div>
+  inverta o sentido. Mudar o sensor exige reiniciar. O destrava vibra e avança em
+  vai-e-volta para não travar; mais ciclos = vibra mais (0 = só o vai-e-volta).</div>
  </div>
  <div class="card">
   <label>Segurança</label>
@@ -350,6 +353,7 @@ function fillCfg(c){
  cfgCache=c;
  $('#c_steps').value=c.stepsPerPortion; $('#c_us').value=c.stepUs;
  $('#c_rev').value=c.reverse?1:0;       $('#c_sens').value=c.sensorEnabled?1:0;
+ $('#c_aj').value=c.antiJam?1:0;        $('#c_shk').value=(c.shakeCycles??4);
  $('#c_day').value=c.maxPerDay;         $('#c_req').value=c.maxPerRequest;
  $('#c_int').value=c.minIntervalS;      $('#c_cat').value=c.catchUpMin;
  $('#c_csz').value=c.camSize;           $('#c_cq').value=c.camQuality;
@@ -393,6 +397,7 @@ async function copySecret(key,sel,btn){
 async function saveCfg(){
  const b={stepsPerPortion:+$('#c_steps').value,stepUs:+$('#c_us').value,
   reverse:$('#c_rev').value=='1',sensorEnabled:$('#c_sens').value=='1',
+  antiJam:$('#c_aj').value=='1',shakeCycles:+$('#c_shk').value,
   maxPerDay:+$('#c_day').value,maxPerRequest:+$('#c_req').value,
   minIntervalS:+$('#c_int').value,catchUpMin:+$('#c_cat').value,
   camSize:+$('#c_csz').value,camQuality:+$('#c_cq').value,

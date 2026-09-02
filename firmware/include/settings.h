@@ -46,6 +46,8 @@ struct Settings {
     uint16_t stepsPerPortion;
     uint16_t stepUs;
     bool     reverse;           // inverte o sentido de giro
+    bool     antiJam;           // destrava: vibra no inicio + avanco em segmentos
+    uint8_t  shakeCycles;       // ciclos de vibracao antes de dispensar (0 = so segmenta)
     uint8_t  maxPerDay;
     uint8_t  maxPerRequest;
     uint16_t minIntervalS;

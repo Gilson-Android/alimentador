@@ -99,7 +99,9 @@ static void writeStep() {
 }
 
 // steps > 0 = sentido de dispensa (ja considerando cfg.reverse)
-static void runSteps(int32_t steps) {
+// release=false mantem as bobinas energizadas no fim (segura a posicao entre
+// segmentos do avanco -> nao deixa a coluna de racao empurrar o eixo de volta)
+static void runSteps(int32_t steps, bool release = true) {
     int dir = (steps >= 0) ? 1 : -1;
     if (cfg.reverse) dir = -dir;
     uint32_t n = abs(steps);
@@ -109,7 +111,31 @@ static void runSteps(int32_t steps) {
         stepDelay(cfg.stepUs);
         if ((i & 0x3F) == 0x3F) vTaskDelay(1);   // ~a cada 64 passos
     }
-    coilsOff();   // solta as bobinas: nao esquenta parado
+    if (release) coilsOff();   // solta as bobinas: nao esquenta parado
+}
+
+// passos a velocidade constante (sem rampa); bobinas geridas pelo chamador
+static void stepConst(int32_t steps, uint32_t us) {
+    int dir = (steps >= 0) ? 1 : -1;
+    if (cfg.reverse) dir = -dir;
+    uint32_t n = abs(steps);
+    for (uint32_t i = 0; i < n; i++) {
+        seqIdx = (seqIdx + dir + 8) % 8;
+        writeStep();
+        stepDelay(us);
+        if ((i & 0x3F) == 0x3F) vTaskDelay(1);
+    }
+}
+
+// vibra: pequenas reversoes para soltar racao compactada. Net = 0 (nao afeta a dose)
+static void shake(uint8_t cycles) {
+    for (uint8_t c = 0; c < cycles; c++) {
+        stepConst(-SHAKE_STEPS, SHAKE_US);   // recua
+        delay(20);
+        stepConst(+SHAKE_STEPS, SHAKE_US);   // avanca de volta
+        delay(20);
+    }
+    coilsOff();
 }
 
 #else
@@ -118,7 +144,9 @@ static void driverEnable(bool on) {
     digitalWrite(PIN_EN, on ? LOW : HIGH);   // ENABLE ativo em nivel baixo
 }
 
-static void runSteps(int32_t steps) {
+// release=false mantem o driver habilitado no fim (torque de retencao entre
+// segmentos do avanco -> a coluna de racao nao empurra o eixo de volta)
+static void runSteps(int32_t steps, bool release = true) {
     int dir = (steps >= 0) ? 1 : -1;
     if (cfg.reverse) dir = -dir;
     digitalWrite(PIN_DIR, dir > 0 ? HIGH : LOW);
@@ -148,9 +176,60 @@ static void runSteps(int32_t steps) {
         stepDelay(per > 6 ? per - 4 : 2);
         if ((i & 0x3F) == 0x3F) vTaskDelay(1);
     }
-    driverEnable(false);   // solta o motor: nao esquenta nem consome parado
+    if (release) driverEnable(false);   // solta o motor: nao esquenta nem consome parado
+}
+
+// passos a velocidade constante (sem rampa); ENABLE gerido pelo chamador
+static void stepConst(int32_t steps, uint32_t us) {
+    int dir = (steps >= 0) ? 1 : -1;
+    if (cfg.reverse) dir = -dir;
+    digitalWrite(PIN_DIR, dir > 0 ? HIGH : LOW);
+    delayMicroseconds(5);                // DIR estabilizar antes do 1o pulso
+    uint32_t n = abs(steps);
+    for (uint32_t i = 0; i < n; i++) {
+        digitalWrite(PIN_STEP, HIGH);
+        delayMicroseconds(4);
+        digitalWrite(PIN_STEP, LOW);
+        stepDelay(us > 6 ? us - 4 : 2);
+        if ((i & 0x3F) == 0x3F) vTaskDelay(1);
+    }
+}
+
+// vibra: pequenas reversoes para soltar racao compactada. Net = 0 (nao afeta a dose)
+static void shake(uint8_t cycles) {
+    driverEnable(true);
+    delayMicroseconds(200);              // driver acordar
+    for (uint8_t c = 0; c < cycles; c++) {
+        stepConst(-SHAKE_STEPS, SHAKE_US);   // recua
+        delay(20);
+        stepConst(+SHAKE_STEPS, SHAKE_US);   // avanca de volta
+        delay(20);
+    }
+    driverEnable(false);
 }
 #endif
+
+// Avanca 'steps' em segmentos, recuando um pouco entre eles. O recuo e "pago"
+// no proximo avanco, entao a dose liquida continua sendo exatamente 'steps'.
+// Esse vai-e-volta ao longo de toda a dispensa e o que evita o entupimento.
+static void dispenseForward(int32_t steps) {
+    int32_t nudge = SHAKE_STEPS;
+    int32_t seg   = steps / DISPENSE_SEGMENTS;
+    if (seg <= nudge) { runSteps(steps); return; }   // dose curta: sem segmentar
+    int32_t done = 0;
+    while (done < steps) {
+        int32_t chunk = steps - done;
+        if (chunk > seg) chunk = seg;
+        bool last = (done + chunk >= steps);
+        runSteps(chunk, /*release=*/last);   // segura o torque entre trechos
+        done += chunk;
+        if (!last) {                     // entre trechos: recua um pouco (reposto depois)
+            runSteps(-nudge, /*release=*/false);
+            done -= nudge;
+            delay(40);                   // pausa COM torque: nao deixa recuar sob carga
+        }
+    }
+}
 
 static void logPush(uint8_t portions, uint8_t src, uint16_t p, bool ok) {
     logBuf[logHead] = {time(nullptr), portions, src, p, ok};
@@ -172,24 +251,31 @@ static void dispense(uint8_t portions, uint8_t src) {
     ledSet(true);
     int32_t steps = (int32_t)portions * cfg.stepsPerPortion;
 
-    // 1) sacode para tras: quebra "ponte" de racao na boca do funil
+    // 1) vibra para soltar a racao compactada (destrava preventivo, net 0)
+    if (cfg.antiJam && cfg.shakeCycles) { shake(cfg.shakeCycles); delay(100); }
+
+    // 2) sacode para tras: quebra "ponte" de racao na boca do funil
     runSteps(-ANTIJAM_STEPS);
     delay(120);
 
-    // 2) dispensa contando graos (se houver sensor)
+    // 3) dispensa (segmentada com micro-recuos quando o destrava esta ligado),
+    //    contando graos se houver sensor
     pulses = 0;
-    runSteps(steps);
+    if (cfg.antiJam) dispenseForward(steps);
+    else             runSteps(steps);
     delay(150);
     uint16_t p1 = pulses;
 
     bool ok = true;
     if (cfg.sensorEnabled && p1 == 0) {
-        // nada caiu: tenta desentupir com um recuo maior e repete meia dose
+        // nada caiu: vibra mais forte, recua bastante e tenta de novo
         Serial.println(F("[feeder] nada detectado, tentando desentupir"));
+        if (cfg.antiJam) shake(cfg.shakeCycles + 3);
         runSteps(-UNJAM_STEPS);
         delay(200);
         pulses = 0;
-        runSteps(steps);
+        if (cfg.antiJam) dispenseForward(steps);
+        else             runSteps(steps);
         delay(150);
         if (pulses == 0) ok = false;
         p1 += pulses;

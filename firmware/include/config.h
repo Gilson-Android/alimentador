@@ -85,6 +85,12 @@
   // travar/patinar no arranque. Se ainda travar, aumente RAMP_START_US.
   #define RAMP_STEPS             200    // passos de acel/desacel
   #define RAMP_START_US          3000   // us/passo no inicio (quanto maior, mais suave)
+  // Destrava (anti-entupimento): vibra no inicio (SHAKE) e avanca em segmentos
+  // com micro-recuos (o recuo e reposto no proximo avanco -> dose intacta).
+  #define SHAKE_STEPS            40     // amplitude de cada tranco da vibracao (~0,9mm de arco)
+  #define SHAKE_US               1400   // us/passo na vibracao (menor=mais rapido/punch, maior=mais torque)
+  #define DISPENSE_SEGMENTS      4      // divide o avanco em N trechos (recua entre eles)
+  #define DEF_SHAKE_CYCLES       4      // ciclos de vibracao antes de dispensar
 #else
   // 28BYJ-48 em meio-passo: 4096 passos por volta do eixo de saida
   #define STEPS_PER_REV          4096
@@ -92,6 +98,11 @@
   #define DEF_STEP_US            1300   // us por meio-passo (nao abaixe de 1000)
   #define ANTIJAM_STEPS          90
   #define UNJAM_STEPS            400
+  // Destrava (anti-entupimento) -- ver comentario no bloco do NEMA17
+  #define SHAKE_STEPS            80     // amplitude de cada tranco da vibracao (~1,2mm de arco)
+  #define SHAKE_US               1200   // us por meio-passo na vibracao (nao abaixe de 1000)
+  #define DISPENSE_SEGMENTS      4      // divide o avanco em N trechos (recua entre eles)
+  #define DEF_SHAKE_CYCLES       4      // ciclos de vibracao antes de dispensar
 #endif
 
 // -------------------------------------------------------------- limites

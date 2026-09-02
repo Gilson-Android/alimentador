@@ -15,6 +15,8 @@ void settingsDefaults() {
     cfg.stepsPerPortion = DEF_STEPS_PER_PORTION;
     cfg.stepUs          = DEF_STEP_US;
     cfg.reverse         = false;
+    cfg.antiJam         = true;
+    cfg.shakeCycles     = DEF_SHAKE_CYCLES;
     cfg.maxPerDay       = DEF_MAX_PER_DAY;
     cfg.maxPerRequest   = DEF_MAX_PER_REQUEST;
     cfg.minIntervalS    = DEF_MIN_INTERVAL_S;
@@ -78,6 +80,8 @@ void settingsToJson(JsonObject o, bool secrets) {
     o["stepsPerPortion"] = cfg.stepsPerPortion;
     o["stepUs"]          = cfg.stepUs;
     o["reverse"]         = cfg.reverse;
+    o["antiJam"]         = cfg.antiJam;
+    o["shakeCycles"]     = cfg.shakeCycles;
     o["maxPerDay"]       = cfg.maxPerDay;
     o["maxPerRequest"]   = cfg.maxPerRequest;
     o["minIntervalS"]    = cfg.minIntervalS;
@@ -134,6 +138,7 @@ bool settingsFromJson(JsonObjectConst o) {
 
     if (o["tgNotify"].is<bool>())      cfg.tgNotify      = o["tgNotify"];
     if (o["reverse"].is<bool>())       cfg.reverse       = o["reverse"];
+    if (o["antiJam"].is<bool>())       cfg.antiJam       = o["antiJam"];
     if (o["sensorEnabled"].is<bool>()) cfg.sensorEnabled = o["sensorEnabled"];
     if (o["camVflip"].is<bool>())      cfg.camVflip      = o["camVflip"];
     if (o["camHmirror"].is<bool>())    cfg.camHmirror    = o["camHmirror"];
@@ -147,6 +152,8 @@ bool settingsFromJson(JsonObjectConst o) {
         cfg.stepsPerPortion = constrain((int)o["stepsPerPortion"], 40, 20000);
     if (o["stepUs"].is<uint16_t>())
         cfg.stepUs = constrain((int)o["stepUs"], 1000, 8000);
+    if (o["shakeCycles"].is<uint8_t>())
+        cfg.shakeCycles = constrain((int)o["shakeCycles"], 0, 20);
     if (o["maxPerDay"].is<uint8_t>())
         cfg.maxPerDay = constrain((int)o["maxPerDay"], 1, 60);
     if (o["maxPerRequest"].is<uint8_t>())
