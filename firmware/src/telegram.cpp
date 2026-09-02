@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
+#include "mbedtls/base64.h"
 #if HAS_CAMERA
 #include "esp_camera.h"
 #endif
@@ -77,6 +78,69 @@ static bool tgSend(const String &text) {
     return tgPostJson("sendMessage", body);
 }
 
+// Retrato dos ajustes OPERACIONAIS (sem rede/segredos) para o painel do
+// Telegram pre-preencher os campos. Vai embutido no link do botao "Abrir
+// painel" -- e o unico jeito de o Mini App (hospedado fora) LER o estado atual
+// sem servidor nenhum. Mantido enxuto para o link nao ficar gigante.
+static String cfgSnapshotJson() {
+    JsonDocument d;
+    d["stepsPerPortion"] = cfg.stepsPerPortion;
+    d["stepUs"]          = cfg.stepUs;
+    d["reverse"]         = cfg.reverse;
+    d["sensorEnabled"]   = cfg.sensorEnabled;
+    d["antiJam"]         = cfg.antiJam;
+    d["shakeCycles"]     = cfg.shakeCycles;
+    d["maxPerDay"]       = cfg.maxPerDay;
+    d["maxPerRequest"]   = cfg.maxPerRequest;
+    d["minIntervalS"]    = cfg.minIntervalS;
+    d["catchUpMin"]      = cfg.catchUpMin;
+    d["camVflip"]        = cfg.camVflip;
+    d["camHmirror"]      = cfg.camHmirror;
+    d["camSize"]         = cfg.camSize;
+    d["camQuality"]      = cfg.camQuality;
+    d["tgNotify"]        = cfg.tgNotify;
+    d["alexaPortions"]   = cfg.alexaPortions;
+    d["tz"]              = cfg.tz;
+    d["hasCam"]          = HAS_CAMERA ? 1 : 0;
+    JsonArray a = d["slots"].to<JsonArray>();
+    for (int i = 0; i < MAX_SLOTS; i++) {
+        JsonObject s = a.add<JsonObject>();
+        s["en"]  = cfg.slots[i].en;
+        s["h"]   = cfg.slots[i].h;
+        s["m"]   = cfg.slots[i].m;
+        s["dow"] = cfg.slots[i].dow;
+        s["p"]   = cfg.slots[i].portions;
+    }
+    String out;
+    serializeJson(d, out);
+    return out;
+}
+
+// base64url (sem padding) do retrato -- seguro para colocar numa query string
+static String cfgSnapshotB64() {
+    String json = cfgSnapshotJson();
+    size_t need = 0;
+    mbedtls_base64_encode(nullptr, 0, &need,
+                          (const unsigned char *)json.c_str(), json.length());
+    char *buf = (char *)malloc(need + 1);
+    if (!buf) return String();
+    size_t olen = 0;
+    String out;
+    if (mbedtls_base64_encode((unsigned char *)buf, need + 1, &olen,
+                              (const unsigned char *)json.c_str(), json.length()) == 0) {
+        out.reserve(olen);
+        for (size_t i = 0; i < olen; i++) {
+            char ch = buf[i];
+            if (ch == '+') ch = '-';
+            else if (ch == '/') ch = '_';
+            else if (ch == '=') continue;   // sem padding
+            out += ch;
+        }
+    }
+    free(buf);
+    return out;
+}
+
 // Envia uma mensagem JUNTO com o teclado de botoes. O Telegram fixa esse
 // teclado na conversa (is_persistent) ate ser trocado -- entao basta mandar
 // uma vez (no /start ou /menu) para os botoes ficarem sempre disponiveis.
@@ -97,7 +161,14 @@ static bool tgSendKb(const String &text) {
         JsonArray r0 = kb.add<JsonArray>();
         JsonObject b = r0.add<JsonObject>();
         b["text"] = "🐟 Abrir painel";
-        b["web_app"]["url"] = TG_WEBAPP_URL;
+        // Anexa o retrato da config na URL para o painel abrir ja preenchido.
+        String url  = TG_WEBAPP_URL;
+        String snap = cfgSnapshotB64();
+        if (snap.length()) {
+            url += (url.indexOf('?') >= 0) ? "&c=" : "?c=";
+            url += snap;
+        }
+        b["web_app"]["url"] = url;
     }
     JsonArray r1 = kb.add<JsonArray>();
     r1.add("🐟 Alimentar"); r1.add("🐟 Alimentar 2x");
@@ -242,6 +313,28 @@ static void handleCommand(const String &chat, String text) {
     }
 
     text.trim();
+
+    // O painel (Mini App) manda os ajustes como JSON. Tratar ANTES do
+    // toLowerCase, que corromperia as chaves/valores do JSON.
+    if (text.startsWith("{") && text.endsWith("}")) {
+        if (text.length() > 3500) { tgSend("⚠️ Configuração grande demais."); return; }
+        JsonDocument d;
+        DeserializationError e = deserializeJson(d, text);
+        if (!e) {
+            settingsFromJson(d.as<JsonObjectConst>());
+            settingsSave();
+            cameraApplySettings();
+            feederApplySensor();
+            setenv("TZ", cfg.tz, 1);
+            tzset();
+            // reenvia o teclado: confirma e ja atualiza o link com o novo retrato
+            tgSendKb("✅ Configuração salva pelo painel.");
+        } else {
+            tgSend(String("⚠️ Não consegui ler a configuração: ") + e.c_str());
+        }
+        return;
+    }
+
     text.toLowerCase();
 
     // Os botoes do teclado mandam um rotulo amigavel (ex.: "🐟 Alimentar 2x").
@@ -286,6 +379,10 @@ static void handleCommand(const String &chat, String text) {
         tgSend(String("Movendo a rosca (") + s + " passos)...");
     } else if (cmd == "/agenda") {
         tgSend(agendaText());
+    } else if (cmd == "/reiniciar" || cmd == "/reboot") {
+        tgSend("Reiniciando o aparelho...");
+        delay(400);
+        ESP.restart();
     } else if (cmd == "/start" || cmd == "/help" || cmd == "/ajuda" || cmd == "/menu") {
         tgSendKb("🐠 AquaFeeder\nToque nos botões abaixo — ou use os comandos:\n"
                  "/alimentar [n] · /foto · /status · /agenda");

@@ -311,6 +311,22 @@ static void feederTask(void *) {
 }
 
 // ---------------------------------------------------------------------- API
+// Liga/desliga a interrupcao do sensor de graos conforme cfg.sensorEnabled.
+// Idempotente (guarda o estado) -> pode ser chamado a cada save sem reiniciar.
+void feederApplySensor() {
+    static bool attached = false;
+    if (cfg.sensorEnabled && PIN_FEED_SENSOR >= 0 && !attached) {
+        pinMode(PIN_FEED_SENSOR, INPUT_PULLUP);
+        attachInterrupt(digitalPinToInterrupt(PIN_FEED_SENSOR), onPulse, FALLING);
+        attached = true;
+        Serial.println(F("[feeder] sensor de graos ligado"));
+    } else if (!cfg.sensorEnabled && attached) {
+        detachInterrupt(digitalPinToInterrupt(PIN_FEED_SENSOR));
+        attached = false;
+        Serial.println(F("[feeder] sensor de graos desligado"));
+    }
+}
+
 void feederInit() {
 #if MOTOR_DRIVER == DRV_ULN2003
     for (int i = 0; i < 4; i++) { pinMode(PINS[i], OUTPUT); digitalWrite(PINS[i], LOW); }
@@ -323,10 +339,7 @@ void feederInit() {
     pinMode(PIN_STATUS_LED, OUTPUT);
     ledSet(false);
 #endif
-    if (cfg.sensorEnabled && PIN_FEED_SENSOR >= 0) {
-        pinMode(PIN_FEED_SENSOR, INPUT_PULLUP);
-        attachInterrupt(digitalPinToInterrupt(PIN_FEED_SENSOR), onPulse, FALLING);
-    }
+    feederApplySensor();
     statLoad();
     rollDay();
     mtx = xSemaphoreCreateMutex();

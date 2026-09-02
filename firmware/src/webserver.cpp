@@ -187,6 +187,7 @@ static esp_err_t hPostConfig(httpd_req_t *r) {
     settingsFromJson(d.as<JsonObjectConst>());
     settingsSave();
     cameraApplySettings();
+    feederApplySensor();
     setenv("TZ", cfg.tz, 1);
     tzset();
 

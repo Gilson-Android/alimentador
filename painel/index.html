@@ -34,6 +34,29 @@ color:var(--warn);font-size:15px;font-weight:600;cursor:pointer}
 .hint{font-size:11px;color:var(--dim);margin-top:14px;line-height:1.5;text-align:center}
 #warn{display:none;background:#3a2f1c;color:var(--warn);border:1px solid var(--warn);
 border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;line-height:1.4}
+/* ---- ajustes ---- */
+details>summary{cursor:pointer;font-weight:700;font-size:16px;padding:2px 0;list-style:none;text-align:left}
+details>summary::-webkit-details-marker{display:none}
+details[open]>summary{margin-bottom:6px}
+.sect{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin:16px 0 8px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f label{text-align:left;margin-bottom:4px}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);
+background:#0e1216;color:var(--fg);font-size:15px;-webkit-appearance:none;appearance:none}
+input[type=checkbox]{width:auto;transform:scale(1.3)}
+.slot{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px}
+.slot .top{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.slot .top label{display:flex;align-items:center;gap:5px;margin:0;color:var(--fg);font-size:13px}
+.days{display:flex;gap:4px}
+.day{flex:1;text-align:center;padding:9px 0;border:1px solid var(--line);border-radius:8px;
+font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
+.day.on{background:var(--acc);color:#08150f;border-color:var(--acc);font-weight:700}
+.savebtn{width:100%;padding:16px;font-size:17px;font-weight:800;border:0;border-radius:14px;
+background:var(--acc);color:#08150f;cursor:pointer;margin-top:12px}
+.savebtn:active{transform:scale(.99)}
+.rebootbtn{width:100%;padding:12px;font-size:14px;font-weight:600;border:1px solid var(--line);
+border-radius:12px;background:#3a2f1c;color:var(--warn);cursor:pointer;margin-top:8px}
+.note{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5}
 </style></head><body>
 
 <div id="warn">Abra este painel pelo botão <b>🐟 Abrir painel</b> no seu bot do Telegram
@@ -67,32 +90,161 @@ border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;line-heig
  <div class="hint" style="margin-top:10px">Avançar joga ração no aquário e não conta no limite diário.</div>
 </div>
 
+<!-- ================= AJUSTES ================= -->
+<div class="card" id="cfgcard" style="display:none">
+ <details>
+  <summary>⚙️ Ajustes</summary>
+
+  <div class="sect">Dosagem</div>
+  <div class="fgrid f">
+   <div><label>Passos por porção</label><input id="f_steps" type="number" min="40" max="20000"></div>
+   <div><label>µs por passo</label><input id="f_us" type="number" min="1000" max="8000"></div>
+   <div><label>Inverter sentido</label><select id="f_rev"><option value="0">Não</option><option value="1">Sim</option></select></div>
+   <div><label>Sensor de grãos</label><select id="f_sens"><option value="0">Desligado</option><option value="1">Ligado</option></select></div>
+   <div><label>Destrava (anti-entupimento)</label><select id="f_aj"><option value="0">Desligado</option><option value="1">Ligado</option></select></div>
+   <div><label>Ciclos de vibração</label><input id="f_shk" type="number" min="0" max="20"></div>
+  </div>
+  <div class="note">O destrava vibra e avança em vai-e-volta pra não travar; mais ciclos = vibra mais (0 = só o vai-e-volta).</div>
+
+  <div class="sect">Segurança</div>
+  <div class="fgrid f">
+   <div><label>Máx. porções/dia</label><input id="f_day" type="number" min="1" max="60"></div>
+   <div><label>Máx. por vez</label><input id="f_req" type="number" min="1" max="20"></div>
+   <div><label>Intervalo mín. (s)</label><input id="f_int" type="number" min="0" max="3600"></div>
+   <div><label>Recuperar atraso (min)</label><input id="f_cat" type="number" min="0" max="720"></div>
+  </div>
+
+  <div class="sect" id="cam-sec-t" style="display:none">Câmera</div>
+  <div class="fgrid f" id="cam-sec" style="display:none">
+   <div><label>Girar vertical</label><select id="f_cv"><option value="0">Não</option><option value="1">Sim</option></select></div>
+   <div><label>Espelhar</label><select id="f_ch"><option value="0">Não</option><option value="1">Sim</option></select></div>
+   <div><label>Resolução</label><select id="f_csz"><option value="0">QVGA</option><option value="1">VGA</option><option value="2">SVGA</option><option value="3">HD</option></select></div>
+   <div><label>Qualidade (10 melhor)</label><input id="f_cq" type="number" min="10" max="30"></div>
+  </div>
+
+  <div class="sect">Notificações e voz</div>
+  <div class="fgrid f">
+   <div><label>Avisar cada alimentação</label><select id="f_tgn"><option value="0">Não</option><option value="1">Sim</option></select></div>
+   <div><label>Porções por "alimentar" (Alexa)</label><input id="f_alp" type="number" min="1" max="20"></div>
+   <div style="grid-column:1/3"><label>Fuso horário (TZ)</label><input id="f_tz" type="text" placeholder="&lt;-03&gt;3"></div>
+  </div>
+
+  <div class="sect">Agenda</div>
+  <div id="slots"></div>
+  <div class="note">Dias: D S T Q Q S S (domingo → sábado). Toque para ligar/desligar.</div>
+
+  <button class="savebtn" onclick="saveConfig()">💾 Salvar ajustes</button>
+  <button class="rebootbtn" onclick="reboot()">↻ Reiniciar aparelho</button>
+  <div class="note">Salvar fecha o painel; a confirmação chega no chat. Reabra pelo <b>/menu</b> para ver os valores atualizados.</div>
+ </details>
+</div>
+
+<div class="card" id="cfgnote" style="display:none">
+ <div class="note" style="text-align:center;margin:0">⚙️ Para editar a configuração, abra o painel pelo <b>/menu</b> do bot (é lá que os valores atuais são carregados).</div>
+</div>
+
 <div class="hint">As respostas (status, foto, agenda) chegam como mensagem no chat.
-O painel fecha sozinho ao enviar um comando. <span style="opacity:.5">v2</span></div>
+O painel fecha sozinho ao enviar um comando. <span style="opacity:.5">v3</span></div>
 
 <script>
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 let qty = 1;
+let CFG = null;
 
 function bump(d){ qty = Math.min(10, Math.max(1, qty + d)); document.getElementById('qty').textContent = qty; }
 
-function send(cmd){
-  // Web App aberto por botao de teclado tem initData vazio -- NAO da pra usar
-  // isso como trava. Tentamos enviar; se der erro (aberto no navegador), avisa.
-  if (!tg || typeof tg.sendData !== 'function') {
-    document.getElementById('warn').style.display = 'block';
-    window.scrollTo(0, 0);
-    return;
-  }
+function showWarn(){ document.getElementById('warn').style.display = 'block'; window.scrollTo(0,0); }
+
+// canal unico: manda o dado pro bot; o Telegram fecha o painel em seguida
+function post(data){
+  if (!tg || typeof tg.sendData !== 'function') { showWarn(); return; }
   try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-  try {
-    tg.sendData(cmd);   // manda pro bot; o Telegram fecha o painel em seguida
-  } catch(e){
-    document.getElementById('warn').style.display = 'block';
-    window.scrollTo(0, 0);
-  }
+  try { tg.sendData(data); } catch(e){ showWarn(); }
 }
+function send(cmd){ post(cmd); }
 function feed(){ send('/alimentar ' + qty); }
+function reboot(){ if (confirm('Reiniciar o aparelho agora?')) send('/reiniciar'); }
+
+// ---- config: le o retrato embutido no link (?c=base64url do JSON) ----
+function b64urlDecode(s){
+  s = s.replace(/-/g,'+').replace(/_/g,'/');
+  while (s.length % 4) s += '=';
+  return decodeURIComponent(escape(atob(s)));
+}
+(function loadCfg(){
+  try {
+    const raw = new URLSearchParams(location.search).get('c');
+    if (raw) CFG = JSON.parse(b64urlDecode(raw));
+  } catch(e){ CFG = null; }
+  if (CFG) { fillConfig(CFG); document.getElementById('cfgcard').style.display = ''; }
+  else     { document.getElementById('cfgnote').style.display = ''; }
+})();
+
+function fillConfig(c){
+  const set = (id,v) => { const e = document.getElementById(id); if (e) e.value = v; };
+  set('f_steps', c.stepsPerPortion); set('f_us', c.stepUs);
+  set('f_rev', c.reverse?1:0);       set('f_sens', c.sensorEnabled?1:0);
+  set('f_aj',  c.antiJam?1:0);       set('f_shk', c.shakeCycles ?? 4);
+  set('f_day', c.maxPerDay);         set('f_req', c.maxPerRequest);
+  set('f_int', c.minIntervalS);      set('f_cat', c.catchUpMin);
+  set('f_tgn', c.tgNotify?1:0);      set('f_alp', c.alexaPortions ?? 1);
+  set('f_tz',  c.tz || '');
+  if (c.hasCam) {
+    document.getElementById('cam-sec').style.display = '';
+    document.getElementById('cam-sec-t').style.display = '';
+    set('f_cv', c.camVflip?1:0);  set('f_ch', c.camHmirror?1:0);
+    set('f_csz', c.camSize ?? 2); set('f_cq', c.camQuality ?? 12);
+  }
+  buildSlots(c.slots || []);
+}
+
+function buildSlots(slots){
+  const dn = ['D','S','T','Q','Q','S','S'];
+  const wrap = document.getElementById('slots');
+  wrap.innerHTML = '';
+  slots.forEach((s) => {
+    const div = document.createElement('div');
+    div.className = 'slot';
+    const hh = String(s.h||0).padStart(2,'0'), mm = String(s.m||0).padStart(2,'0');
+    let days = '';
+    for (let b=0;b<7;b++) days += `<div class="day${(s.dow>>b)&1?' on':''}" data-b="${b}">${dn[b]}</div>`;
+    div.innerHTML =
+      `<div class="top">
+         <label><input type="checkbox" class="s_en" ${s.en?'checked':''}> ativo</label>
+         <input type="time" class="s_t" value="${hh}:${mm}" style="flex:1">
+         <input type="number" class="s_p" min="1" max="20" value="${s.p||1}" style="width:70px" title="porções">
+       </div>
+       <div class="days">${days}</div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('.day').forEach(d => d.onclick = () => d.classList.toggle('on'));
+}
+
+function collectConfig(){
+  const v = id => document.getElementById(id).value;
+  const n = id => +document.getElementById(id).value;
+  const o = {
+    stepsPerPortion:n('f_steps'), stepUs:n('f_us'),
+    reverse:v('f_rev')=='1', sensorEnabled:v('f_sens')=='1',
+    antiJam:v('f_aj')=='1', shakeCycles:n('f_shk'),
+    maxPerDay:n('f_day'), maxPerRequest:n('f_req'),
+    minIntervalS:n('f_int'), catchUpMin:n('f_cat'),
+    tgNotify:v('f_tgn')=='1', alexaPortions:n('f_alp'), tz:v('f_tz')
+  };
+  if (CFG && CFG.hasCam) {
+    o.camVflip = v('f_cv')=='1'; o.camHmirror = v('f_ch')=='1';
+    o.camSize = n('f_csz'); o.camQuality = n('f_cq');
+  }
+  o.slots = [...document.querySelectorAll('#slots .slot')].map(d => {
+    const parts = (d.querySelector('.s_t').value || '0:0').split(':');
+    let dow = 0;
+    d.querySelectorAll('.day.on').forEach(x => dow |= (1 << (+x.dataset.b)));
+    return { en:d.querySelector('.s_en').checked, h:+parts[0]||0, m:+parts[1]||0,
+             dow:dow, p:+d.querySelector('.s_p').value||1 };
+  });
+  return o;
+}
+function saveConfig(){ post(JSON.stringify(collectConfig())); }
 
 if (tg) {
   try { tg.ready(); tg.expand(); } catch(e){}
@@ -101,12 +253,9 @@ if (tg) {
     const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (u && u.first_name) document.getElementById('sub').textContent = 'olá, ' + u.first_name;
   } catch(e){}
-  // Fora do Telegram (aberto no navegador) o SDK reporta platform 'unknown'.
-  // Dentro do Telegram (inclusive via botao de teclado) vem ios/android/tdesktop.
-  if (!tg.platform || tg.platform === 'unknown')
-    document.getElementById('warn').style.display = 'block';
+  if (!tg.platform || tg.platform === 'unknown') showWarn();
 } else {
-  document.getElementById('warn').style.display = 'block';
+  showWarn();
 }
 </script>
 </body></html>

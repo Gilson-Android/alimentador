@@ -27,6 +27,9 @@ typedef void (*FeedDoneCb)(uint8_t portions, const char *src, bool ok, uint16_t 
 void        feederOnDone(FeedDoneCb cb);
 
 void        feederInit();
+// (Re)aplica o sensor de graos conforme cfg.sensorEnabled -- liga/desliga a
+// interrupcao na hora, sem precisar reiniciar. Chamar apos salvar a config.
+void        feederApplySensor();
 // Enfileira uma alimentacao. Retorna false e preenche err se alguma trava barrar.
 bool        feederRequest(uint8_t portions, FeedSrc src, String &err);
 // Giro manual bruto, para desentupir / calibrar (+ = frente, - = re)

@@ -139,8 +139,8 @@ margin-left:6px;vertical-align:middle;color:var(--dim);font-weight:500}
    <div><label>Ciclos de vibração</label><input id="c_shk" type="number" min="0" max="20"></div>
   </div>
   <div class="hint">Meia volta = 2048 passos. Se a ração sair para o lado errado,
-  inverta o sentido. Mudar o sensor exige reiniciar. O destrava vibra e avança em
-  vai-e-volta para não travar; mais ciclos = vibra mais (0 = só o vai-e-volta).</div>
+  inverta o sentido. O destrava vibra e avança em vai-e-volta para não travar;
+  mais ciclos = vibra mais (0 = só o vai-e-volta).</div>
  </div>
  <div class="card">
   <label>Segurança</label>
